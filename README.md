@@ -22,20 +22,21 @@
 │   │   ├── schemas/      # Pydantic Schema
 │   │   ├── external/     # 外部集成
 │   │   ├── utils/        # 工具函数
-│   │   └── config/       # 配置
+│   │   ├── config/       # 配置
+│   │   └── main.py       # 应用入口
 │   ├── requirements.txt
-│   └── main.py
+│   └── alembic.ini
 ├── frontend/             # 前端项目
 │   ├── src/
 │   │   ├── pages/        # 页面组件
 │   │   └── services/     # API服务
 │   ├── package.json
 │   └── index.html
-└── 文档/
-    ├── PRD.md           # 产品需求
-    ├── TASKS.json       # 任务清单
-    ├── TECH_DESIGN.md   # 技术设计
-    └── TEST_CASES.md    # 测试用例
+├── PRD.md               # 产品需求
+├── TASKS.json           # 任务清单
+├── TECH_DESIGN.md       # 技术设计
+├── TEST_CASES.md        # 测试用例
+└── README.md
 ```
 
 ## 功能特性
