@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}评审中心{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>📝 评审中心</h1>
+    <p>管理评审任务、指派评审人员、跟踪评审进度</p>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value">{{ stats.pending }}</div>
+        <div class="stat-label">待评审</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value">{{ stats.in_progress }}</div>
+        <div class="stat-label">评审中</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ stats.completed }}</div>
+        <div class="stat-label">已完成</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">{{ stats.reviewers }}</div>
+        <div class="stat-label">评审人员</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <select class="search-box" id="statusFilter" onchange="filterTable()" style="width:150px;">
+                <option value="">全部状态</option>
+                <option value="pending">待评审</option>
+                <option value="in_progress">评审中</option>
+                <option value="completed">已完成</option>
+            </select>
+        </div>
+    </div>
+
+    <table id="reviewTable">
+        <thead>
+            <tr>
+                <th>标书名称</th>
+                <th>应标供应商</th>
+                <th>评审人员</th>
+                <th>评分</th>
+                <th>状态</th>
+                <th>评审时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews %}
+            <tr data-status="{{ review.status }}">
+                <td><strong>{{ review.tender_title }}</strong></td>
+                <td>{{ review.supplier_name }}</td>
+                <td>{{ review.reviewer_name }}</td>
+                <td>
+                    {% if review.score %}
+                    <span style="color:#fa8c16; font-weight:700; font-size:18px;">{{ review.score }}</span>
+                    <span style="color:#999;">/100</span>
+                    {% else %}
+                    <span style="color:#999;">未评分</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if review.status == 'pending' %}
+                    <span class="badge badge-gray">待评审</span>
+                    {% elif review.status == 'in_progress' %}
+                    <span class="badge badge-orange">评审中</span>
+                    {% else %}
+                    <span class="badge badge-green">已完成</span>
+                    {% endif %}
+                </td>
+                <td>{{ review.reviewed_at or '-' }}</td>
+                <td class="actions">
+                    {% if review.status != 'completed' %}
+                    <button class="btn btn-primary" onclick="scoreReview('{{ review.id }}')">评分</button>
+                    {% endif %}
+                    <button class="btn btn-outline" onclick="viewReview('{{ review.id }}')">详情</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>暂无评审数据</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-overlay" id="scoreModal">
+    <div class="modal" style="width:500px;">
+        <div class="modal-header">
+            <h3>评审评分</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="scoreForm">
+                <input type="hidden" id="reviewId">
+                <div class="form-group">
+                    <label>技术评分 (0-40分)</label>
+                    <input type="number" id="tech_score" min="0" max="40" step="0.1" placeholder="请输入技术评分">
+                </div>
+                <div class="form-group">
+                    <label>商务评分 (0-30分)</label>
+                    <input type="number" id="biz_score" min="0" max="30" step="0.1" placeholder="请输入商务评分">
+                </div>
+                <div class="form-group">
+                    <label>价格评分 (0-30分)</label>
+                    <input type="number" id="price_score" min="0" max="30" step="0.1" placeholder="请输入价格评分">
+                </div>
+                <div class="form-group">
+                    <label>总分</label>
+                    <input type="text" id="total_score" readonly style="background:#f5f5f5; font-weight:700; font-size:18px; color:#1890ff;">
+                </div>
+                <div class="form-group">
+                    <label>评审意见</label>
+                    <textarea id="comment" placeholder="请输入评审意见"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="submitScore()">提交评分</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTable() {
+    const status = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('#reviewTable tbody tr');
+    rows.forEach(row => {
+        const rowStatus = row.getAttribute('data-status') || '';
+        row.style.display = (!status || rowStatus === status) ? '' : 'none';
+    });
+}
+
+function scoreReview(id) {
+    document.getElementById('reviewId').value = id;
+    document.getElementById('scoreForm').reset();
+    document.getElementById('scoreModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('scoreModal').classList.remove('show');
+}
+
+function viewReview(id) {
+    window.location.href = '/reviews/' + id;
+}
+
+['tech_score', 'biz_score', 'price_score'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+        const tech = parseFloat(document.getElementById('tech_score').value) || 0;
+        const biz = parseFloat(document.getElementById('biz_score').value) || 0;
+        const price = parseFloat(document.getElementById('price_score').value) || 0;
+        document.getElementById('total_score').value = (tech + biz + price).toFixed(1);
+    });
+});
+
+function submitScore() {
+    const id = document.getElementById('reviewId').value;
+    const data = {
+        tech_score: parseFloat(document.getElementById('tech_score').value) || 0,
+        biz_score: parseFloat(document.getElementById('biz_score').value) || 0,
+        price_score: parseFloat(document.getElementById('price_score').value) || 0,
+        comment: document.getElementById('comment').value,
+    };
+    fetch('/api/v1/reviews/' + id + '/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(() => { closeModal(); window.location.reload(); })
+    .catch(() => alert('提交失败'));
+}
+</script>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}标书管理{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>📋 标书管理</h1>
+    <p>创建和管理招标标书，邀请供应商参与投标</p>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value">{{ stats.draft }}</div>
+        <div class="stat-label">草稿</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📢</div>
+        <div class="stat-value">{{ stats.published }}</div>
+        <div class="stat-label">已发布</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value">{{ stats.in_progress }}</div>
+        <div class="stat-label">进行中</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ stats.completed }}</div>
+        <div class="stat-label">已完成</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <input type="text" class="search-box" id="searchInput" placeholder="搜索标书名称..." oninput="filterTable()">
+            <select class="search-box" id="statusFilter" onchange="filterTable()" style="width:150px;">
+                <option value="">全部状态</option>
+                <option value="draft">草稿</option>
+                <option value="published">已发布</option>
+                <option value="in_progress">进行中</option>
+                <option value="completed">已完成</option>
+                <option value="cancelled">已取消</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="showAddModal()">+ 新建标书</button>
+    </div>
+
+    <table id="tenderTable">
+        <thead>
+            <tr>
+                <th>标书编号</th>
+                <th>标书名称</th>
+                <th>预算金额</th>
+                <th>状态</th>
+                <th>投标截止</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tender in tenders %}
+            <tr data-name="{{ tender.title }}" data-status="{{ tender.status }}">
+                <td><code>{{ tender.tender_no }}</code></td>
+                <td><strong>{{ tender.title }}</strong></td>
+                <td style="color:#fa8c16; font-weight:600;">¥{{ tender.budget }}</td>
+                <td>
+                    {% if tender.status == 'draft' %}
+                    <span class="badge badge-gray">草稿</span>
+                    {% elif tender.status == 'published' %}
+                    <span class="badge badge-blue">已发布</span>
+                    {% elif tender.status == 'in_progress' %}
+                    <span class="badge badge-orange">进行中</span>
+                    {% elif tender.status == 'completed' %}
+                    <span class="badge badge-green">已完成</span>
+                    {% else %}
+                    <span class="badge badge-red">已取消</span>
+                    {% endif %}
+                </td>
+                <td>{{ tender.deadline }}</td>
+                <td>{{ tender.created_at }}</td>
+                <td class="actions">
+                    <button class="btn btn-outline" onclick="viewTender('{{ tender.id }}')">查看</button>
+                    {% if tender.status == 'draft' %}
+                    <button class="btn btn-success" onclick="publishTender('{{ tender.id }}')">发布</button>
+                    {% endif %}
+                    <button class="btn btn-primary" onclick="editTender('{{ tender.id }}')">编辑</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>暂无标书数据</p>
+                        <button class="btn btn-primary" onclick="showAddModal()" style="margin-top:16px;">+ 新建标书</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">新建标书</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="tenderForm">
+                <input type="hidden" id="tenderId">
+                <div class="form-group">
+                    <label>标书名称 *</label>
+                    <input type="text" id="title" required placeholder="请输入标书名称">
+                </div>
+                <div class="form-group">
+                    <label>项目描述</label>
+                    <textarea id="description" placeholder="请输入项目描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>预算金额 (元) *</label>
+                    <input type="number" id="budget" required placeholder="请输入预算金额" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>投标截止时间 *</label>
+                    <input type="datetime-local" id="deadline" required>
+                </div>
+                <div class="form-group">
+                    <label>开标时间</label>
+                    <input type="datetime-local" id="open_time">
+                </div>
+                <div class="form-group">
+                    <label>采购方式</label>
+                    <select id="procurement_method">
+                        <option value="public_bidding">公开招标</option>
+                        <option value="invited_bidding">邀请招标</option>
+                        <option value="competitive_negotiation">竞争性谈判</option>
+                        <option value="single_source">单一来源</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveTender()">保存</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('#tenderTable tbody tr');
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name') || '';
+        const rowStatus = row.getAttribute('data-status') || '';
+        const matchSearch = !search || name.toLowerCase().includes(search);
+        const matchStatus = !status || rowStatus === status;
+        row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+    });
+}
+
+function showAddModal() {
+    document.getElementById('modalTitle').textContent = '新建标书';
+    document.getElementById('tenderForm').reset();
+    document.getElementById('tenderId').value = '';
+    document.getElementById('addModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('addModal').classList.remove('show');
+}
+
+function editTender(id) {
+    document.getElementById('modalTitle').textContent = '编辑标书';
+    document.getElementById('tenderId').value = id;
+    document.getElementById('addModal').classList.add('show');
+}
+
+function viewTender(id) {
+    window.location.href = '/tenders/' + id;
+}
+
+function publishTender(id) {
+    if (confirm('确定要发布该标书吗？发布后将通知所有相关供应商。')) {
+        fetch('/api/v1/tenders/' + id + '/publish', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => window.location.reload())
+            .catch(() => alert('发布失败'));
+    }
+}
+
+function saveTender() {
+    const id = document.getElementById('tenderId').value;
+    const data = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        budget: parseFloat(document.getElementById('budget').value),
+        deadline: document.getElementById('deadline').value,
+        open_time: document.getElementById('open_time').value,
+        procurement_method: document.getElementById('procurement_method').value,
+    };
+    const url = id ? '/api/v1/tenders/' + id : '/api/v1/tenders';
+    const method = id ? 'PUT' : 'POST';
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(() => { closeModal(); window.location.reload(); })
+    .catch(() => alert('保存失败'));
+}
+</script>
+{% endblock %}

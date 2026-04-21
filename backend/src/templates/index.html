@@ -1,73 +1,54 @@
+{% extends "base.html" %}
+{% block title %}招标管理系统 - 首页{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>🏗️ 招标管理系统</h1>
+    <p>欢迎使用招标管理系统，支持供应商管理、标书管理、应标管理、评审管理和中标管理</p>
+</div>
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>招标管理系统</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            padding: 60px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 600px;
-        }
-        h1 {
-            color: #333;
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-        .success {
-            color: #52c41a;
-            font-size: 24px;
-            margin: 20px 0;
-        }
-        .info {
-            color: #666;
-            font-size: 16px;
-            margin: 10px 0;
-            line-height: 1.6;
-        }
-        .status {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #e6f7ff;
-            color: #1890ff;
-            border-radius: 20px;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-        .time {
-            color: #999;
-            font-size: 14px;
-            margin-top: 30px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🏗️ 招标管理系统</h1>
-        <div class="status">✅ 系统运行正常</div>
-        <p class="success">🎉 恭喜！后端服务已成功启动！</p>
-        <p class="info">这是一个完整的招标管理系统</p>
-        <p class="info">支持供应商管理、标书管理、应标管理、评审管理和中标管理</p>
-        <p class="info">技术栈：Python 3.11 + FastAPI + SQLAlchemy</p>
-        <p class="time">当前时间：{{ current_time }}</p>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-value">{{ stats.suppliers }}</div>
+        <div class="stat-label">供应商总数</div>
     </div>
-</body>
-</html>
+    <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value">{{ stats.tenders }}</div>
+        <div class="stat-label">标书总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value">{{ stats.bids }}</div>
+        <div class="stat-label">应标总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ stats.results }}</div>
+        <div class="stat-label">中标总数</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 16px;">📌 快捷操作</h3>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="/suppliers" class="btn btn-primary">管理供应商</a>
+        <a href="/tenders" class="btn btn-primary">管理标书</a>
+        <a href="/reviews" class="btn btn-success">评审中心</a>
+        <a href="/results" class="btn btn-warning">中标管理</a>
+        <a href="/docs" class="btn btn-outline">API 文档</a>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 16px;">🕐 系统信息</h3>
+    <table>
+        <tr><td style="width:200px; color:#666;">系统版本</td><td>v1.0.0</td></tr>
+        <tr><td style="color:#666;">技术栈</td><td>Python 3.11 + FastAPI + SQLAlchemy</td></tr>
+        <tr><td style="color:#666;">前端方案</td><td>Jinja2 模板渲染</td></tr>
+        <tr><td style="color:#666;">数据库</td><td>PostgreSQL 15</td></tr>
+        <tr><td style="color:#666;">当前时间</td><td>{{ current_time }}</td></tr>
+        <tr><td style="color:#666;">系统状态</td><td><span class="badge badge-green">运行正常</span></td></tr>
+    </table>
+</div>
+{% endblock %}

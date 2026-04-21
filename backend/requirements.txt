@@ -12,5 +12,6 @@ httpx
 aiosmtplib
 redis
 python-dotenv
+jinja2
 pytest
 pytest-asyncio
