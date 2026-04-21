@@ -76,7 +76,7 @@
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn src.main:app --reload --port 8000
+python -m uvicorn src.main:app --host 127.0.0.1 --port 8000
 ```
 
 ### 前端
