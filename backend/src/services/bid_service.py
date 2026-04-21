@@ -11,11 +11,11 @@ from src.schemas.bid import BidCreate
 
 class BidService:
     @staticmethod
-    def validate_invite_token(db: Session, token: str) -&gt; Optional[TenderInvitee]:
+    def validate_invite_token(db, token):
         return db.query(TenderInvitee).filter(TenderInvitee.invite_token == token).first()
 
     @staticmethod
-    def submit_bid(db: Session, invite_token: str, data: BidCreate) -&gt; Bid:
+    def submit_bid(db, invite_token, data):
         invitee = db.query(TenderInvitee).filter(TenderInvitee.invite_token == invite_token).first()
         if not invitee:
             raise ValueError("无效的应标令牌")
@@ -51,7 +51,7 @@ class BidService:
         return bid
 
     @staticmethod
-    def upload_bid_file(db: Session, bid_id: UUID, file: UploadFile, file_type: str) -&gt; BidFile:
+    def upload_bid_file(db, bid_id, file, file_type):
         bid_file = BidFile(
             bid_id=bid_id,
             type=file_type,
@@ -66,10 +66,9 @@ class BidService:
         return bid_file
 
     @staticmethod
-    def get_bids_by_tender(db: Session, tender_id: UUID) -&gt; List[Bid]:
+    def get_bids_by_tender(db, tender_id):
         return db.query(Bid).filter(Bid.tender_id == tender_id).all()
 
     @staticmethod
-    def get_bid(db: Session, bid_id: UUID) -&gt; Optional[Bid]:
+    def get_bid(db, bid_id):
         return db.query(Bid).filter(Bid.id == bid_id).first()
-

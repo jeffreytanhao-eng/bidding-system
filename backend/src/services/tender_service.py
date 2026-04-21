@@ -12,7 +12,7 @@ import secrets
 
 class TenderService:
     @staticmethod
-    def create_tender(db: Session, data: TenderCreate) -&gt; Tender:
+    def create_tender(db, data):
         tender = Tender(**data.model_dump())
         db.add(tender)
         db.commit()
@@ -20,7 +20,7 @@ class TenderService:
         return tender
 
     @staticmethod
-    def update_tender(db: Session, tender_id: UUID, data: TenderUpdate) -&gt; Tender:
+    def update_tender(db, tender_id, data):
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
             raise ValueError("标书不存在")
@@ -34,18 +34,18 @@ class TenderService:
         return tender
 
     @staticmethod
-    def get_tenders(db: Session, status: Optional[str] = None) -&gt; List[Tender]:
+    def get_tenders(db, status=None):
         query = db.query(Tender)
         if status:
             query = query.filter(Tender.status == status)
         return query.all()
 
     @staticmethod
-    def get_tender(db: Session, tender_id: UUID) -&gt; Optional[Tender]:
+    def get_tender(db, tender_id):
         return db.query(Tender).filter(Tender.id == tender_id).first()
 
     @staticmethod
-    def select_invitees(db: Session, tender_id: UUID, supplier_ids: List[UUID]) -&gt; List[TenderInvitee]:
+    def select_invitees(db, tender_id, supplier_ids):
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
             raise ValueError("标书不存在")
@@ -73,7 +73,7 @@ class TenderService:
         return invitees
 
     @staticmethod
-    async def publish_tender(db: Session, tender_id: UUID, email_config: dict) -&gt; dict:
+    async def publish_tender(db, tender_id, email_config):
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
             raise ValueError("标书不存在")
@@ -118,7 +118,7 @@ class TenderService:
         }
 
     @staticmethod
-    def upload_attachment(db: Session, tender_id: UUID, file: UploadFile) -&gt; TenderAttachment:
+    def upload_attachment(db, tender_id, file):
         attachment = TenderAttachment(
             tender_id=tender_id,
             filename=file.filename,
@@ -130,4 +130,3 @@ class TenderService:
         db.commit()
         db.refresh(attachment)
         return attachment
-

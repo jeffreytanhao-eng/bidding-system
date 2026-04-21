@@ -8,14 +8,14 @@ settings = get_settings()
 
 
 class EmailService:
-    def __init__(self, host: str = None, port: int = None, username: str = None, password: str = None):
+    def __init__(self, host=None, port=None, username=None, password=None):
         self.host = host or settings.SMTP_HOST
         self.port = port or settings.SMTP_PORT
         self.username = username or settings.SMTP_USERNAME
         self.password = password or settings.SMTP_PASSWORD
         self.from_email = settings.SMTP_FROM or self.username
 
-    async def send_tender_notice(self, to_emails: list, tender_info: dict) -&gt; bool:
+    async def send_tender_notice(self, to_emails, tender_info):
         if not self.host:
             return False
         
@@ -59,7 +59,7 @@ class EmailService:
             print(f"发送邮件失败: {e}")
             return False
 
-    async def send_winner_notice(self, to_email: str, result_info: dict) -&gt; bool:
+    async def send_winner_notice(self, to_email, result_info):
         if not self.host:
             return False
         
@@ -101,4 +101,3 @@ class EmailService:
         except Exception as e:
             print(f"发送邮件失败: {e}")
             return False
-

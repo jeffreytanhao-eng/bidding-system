@@ -11,7 +11,7 @@ from decimal import Decimal
 
 class ReviewService:
     @staticmethod
-    def assign_reviewers(db: Session, tender_id: UUID, reviewers: List[dict]) -&gt; List[Reviewer]:
+    def assign_reviewers(db, tender_id, reviewers):
         from src.models.tender import Tender
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
@@ -41,7 +41,7 @@ class ReviewService:
         return assigned_reviewers
 
     @staticmethod
-    async def start_review(db: Session, tender_id: UUID) -&gt; dict:
+    async def start_review(db, tender_id):
         from src.models.tender import Tender
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
@@ -80,7 +80,7 @@ class ReviewService:
         }
 
     @staticmethod
-    def submit_score(db: Session, reviewer_id: UUID, bid_id: UUID, score_data: ScoreCreate) -&gt; ReviewScore:
+    def submit_score(db, reviewer_id, bid_id, score_data):
         reviewer = db.query(Reviewer).filter(Reviewer.id == reviewer_id).first()
         if not reviewer:
             raise ValueError("评审人员不存在")
@@ -131,7 +131,7 @@ class ReviewService:
         return review_score
 
     @staticmethod
-    def get_review_progress(db: Session, tender_id: UUID) -&gt; dict:
+    def get_review_progress(db, tender_id):
         reviewers = db.query(Reviewer).filter(Reviewer.tender_id == tender_id).all()
         
         from src.models.bid import Bid
@@ -160,7 +160,7 @@ class ReviewService:
         }
 
     @staticmethod
-    async def remind_reviewers(db: Session, tender_id: UUID) -&gt; int:
+    async def remind_reviewers(db, tender_id):
         reviewers = db.query(Reviewer).filter(
             Reviewer.tender_id == tender_id,
             Reviewer.status != "completed"
@@ -184,4 +184,3 @@ class ReviewService:
                     pass
         
         return reminded_count
-

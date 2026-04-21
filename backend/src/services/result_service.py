@@ -12,7 +12,7 @@ from src.external.email_client import EmailService
 
 class ResultService:
     @staticmethod
-    def calculate_summary(db: Session, tender_id: UUID) -&gt; List[dict]:
+    def calculate_summary(db, tender_id):
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
             raise ValueError("标书不存在")
@@ -71,7 +71,7 @@ class ResultService:
         return results
 
     @staticmethod
-    def set_weights(db: Session, tender_id: UUID, business_weight: float, technical_weight: float) -&gt; Tender:
+    def set_weights(db, tender_id, business_weight, technical_weight):
         if abs(business_weight + technical_weight - 1.0) &gt; 0.001:
             raise ValueError("权重和必须等于1")
         
@@ -86,7 +86,7 @@ class ResultService:
         return tender
 
     @staticmethod
-    def approve_result(db: Session, tender_id: UUID, winner_bid_id: UUID, approver_id: UUID) -&gt; dict:
+    def approve_result(db, tender_id, winner_bid_id, approver_id):
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
             raise ValueError("标书不存在")
@@ -107,7 +107,7 @@ class ResultService:
         }
 
     @staticmethod
-    async def announce_result(db: Session, tender_id: UUID) -&gt; dict:
+    async def announce_result(db, tender_id):
         tender = db.query(Tender).filter(Tender.id == tender_id).first()
         if not tender:
             raise ValueError("标书不存在")
@@ -142,4 +142,3 @@ class ResultService:
             "winner_supplier": supplier.name if supplier else "",
             "announced_at": tender.completed_at.isoformat()
         }
-

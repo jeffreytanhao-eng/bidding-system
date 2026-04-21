@@ -2,7 +2,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config.settings import get_settings
-from src.api.routes import suppliers, tenders, bids, reviews, results
 
 settings = get_settings()
 
@@ -19,13 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-app.include_router(suppliers.router, prefix=settings.API_V1_STR)
-app.include_router(tenders.router, prefix=settings.API_V1_STR)
-app.include_router(bids.router, prefix=settings.API_V1_STR)
-app.include_router(reviews.router, prefix=settings.API_V1_STR)
-app.include_router(results.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

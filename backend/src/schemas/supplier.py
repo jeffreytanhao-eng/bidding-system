@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 from uuid import UUID
@@ -9,7 +9,7 @@ class SupplierBase(BaseModel):
     name: str
     contact_person: Optional[str] = None
     contact_phone: Optional[str] = None
-    contact_email: Optional[EmailStr] = None
+    contact_email: Optional[str] = None
     address: Optional[str] = None
     business_scope: Optional[str] = None
 
@@ -22,7 +22,7 @@ class SupplierUpdate(BaseModel):
     name: Optional[str] = None
     contact_person: Optional[str] = None
     contact_phone: Optional[str] = None
-    contact_email: Optional[EmailStr] = None
+    contact_email: Optional[str] = None
     address: Optional[str] = None
     business_scope: Optional[str] = None
     rating: Optional[str] = None

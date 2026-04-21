@@ -9,7 +9,7 @@ from src.schemas.supplier import SupplierCreate, SupplierUpdate
 
 class SupplierService:
     @staticmethod
-    def create_supplier(db: Session, data: SupplierCreate) -&gt; Supplier:
+    def create_supplier(db, data):
         supplier = Supplier(**data.model_dump())
         db.add(supplier)
         db.commit()
@@ -17,7 +17,7 @@ class SupplierService:
         return supplier
 
     @staticmethod
-    def update_supplier(db: Session, supplier_id: UUID, data: SupplierUpdate) -&gt; Supplier:
+    def update_supplier(db, supplier_id, data):
         supplier = db.query(Supplier).filter(Supplier.id == supplier_id).first()
         if not supplier:
             raise ValueError("供应商不存在")
@@ -31,7 +31,7 @@ class SupplierService:
         return supplier
 
     @staticmethod
-    def get_suppliers(db: Session, filters: Optional[dict] = None) -&gt; List[Supplier]:
+    def get_suppliers(db, filters=None):
         query = db.query(Supplier)
         
         if filters:
@@ -45,11 +45,11 @@ class SupplierService:
         return query.all()
 
     @staticmethod
-    def get_supplier(db: Session, supplier_id: UUID) -&gt; Optional[Supplier]:
+    def get_supplier(db, supplier_id):
         return db.query(Supplier).filter(Supplier.id == supplier_id).first()
 
     @staticmethod
-    def add_tag(db: Session, supplier_id: UUID, tag_name: str) -&gt; SupplierTag:
+    def add_tag(db, supplier_id, tag_name):
         tag = db.query(SupplierTag).filter(SupplierTag.name == tag_name).first()
         if not tag:
             tag = SupplierTag(name=tag_name)
@@ -59,7 +59,7 @@ class SupplierService:
         return tag
 
     @staticmethod
-    def update_rating(db: Session, supplier_id: UUID, rating: str) -&gt; Supplier:
+    def update_rating(db, supplier_id, rating):
         supplier = db.query(Supplier).filter(Supplier.id == supplier_id).first()
         if not supplier:
             raise ValueError("供应商不存在")
@@ -67,4 +67,3 @@ class SupplierService:
         db.commit()
         db.refresh(supplier)
         return supplier
-

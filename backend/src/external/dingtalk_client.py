@@ -6,13 +6,13 @@ settings = get_settings()
 
 
 class DingTalkService:
-    def __init__(self, app_key: str = None, app_secret: str = None):
+    def __init__(self, app_key=None, app_secret=None):
         self.app_key = app_key or settings.DINGTALK_APP_KEY
         self.app_secret = app_secret or settings.DINGTALK_APP_SECRET
         self.base_url = "https://oapi.dingtalk.com"
         self._access_token = None
 
-    async def get_access_token(self) -&gt; str:
+    async def get_access_token(self):
         if self._access_token:
             return self._access_token
         
@@ -31,7 +31,7 @@ class DingTalkService:
                 return self._access_token
             raise Exception(f"钉钉API认证失败: {result.get('errmsg')}")
 
-    async def get_department_list(self) -&gt; list:
+    async def get_department_list(self):
         access_token = await self.get_access_token()
         url = f"{self.base_url}/topapi/v2/department/listsub"
         async with httpx.AsyncClient() as client:
@@ -44,7 +44,7 @@ class DingTalkService:
                 return result.get("result", [])
             raise Exception(f"获取部门列表失败: {result.get('errmsg')}")
 
-    async def get_department_users(self, dept_id: int) -&gt; list:
+    async def get_department_users(self, dept_id):
         access_token = await self.get_access_token()
         url = f"{self.base_url}/topapi/user/list"
         async with httpx.AsyncClient() as client:
@@ -60,7 +60,7 @@ class DingTalkService:
                 return result.get("result", {}).get("userlist", [])
             raise Exception(f"获取部门用户失败: {result.get('errmsg')}")
 
-    async def send_work_notice(self, user_id: str, message: dict) -&gt; dict:
+    async def send_work_notice(self, user_id, message):
         access_token = await self.get_access_token()
         url = f"{self.base_url}/topapi/message/corpconversation/asyncsend_v2"
         async with httpx.AsyncClient() as client:
@@ -76,4 +76,3 @@ class DingTalkService:
             if result.get("errcode") == 0:
                 return result
             raise Exception(f"发送工作通知失败: {result.get('errmsg')}")
-
