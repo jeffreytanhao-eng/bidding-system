@@ -1,0 +1,965 @@
+{
+  "project": "bidding-system",
+  "version": "1.0.0",
+  "created_at": "2026-04-20T18:30:00Z",
+  "tech_stack": {
+    "backend": "Python 3.11 + FastAPI",
+    "frontend": "React 18 + TypeScript + Ant Design",
+    "database": "PostgreSQL 15",
+    "cache": "Redis",
+    "storage": "MinIO/OSS",
+    "queue": "RabbitMQ"
+  },
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "创建项目基础结构",
+      "priority": 1,
+      "status": "pending",
+      "dependencies": [],
+      "estimated_complexity": "low",
+      "implementation": {
+        "type": "create",
+        "description": "创建后端项目目录结构和基础配置文件",
+        "files_to_create": [
+          "backend/src/__init__.py",
+          "backend/src/config/__init__.py",
+          "backend/src/config/settings.py",
+          "backend/requirements.txt",
+          "backend/alembic.ini"
+        ]
+      },
+      "test_requirements": {
+        "verification": "项目可正常启动"
+      },
+      "related_feature": null,
+      "related_api": []
+    },
+    {
+      "id": "T002",
+      "title": "配置数据库连接",
+      "priority": 2,
+      "status": "pending",
+      "dependencies": ["T001"],
+      "estimated_complexity": "low",
+      "implementation": {
+        "file_path": "backend/src/utils/database.py",
+        "type": "create",
+        "description": "创建数据库连接和会话管理",
+        "code_spec": {
+          "imports": [
+            "from sqlalchemy import create_engine",
+            "from sqlalchemy.orm import sessionmaker, Session",
+            "from sqlalchemy.ext.declarative import declarative_base"
+          ],
+          "functions": [
+            {
+              "name": "get_db",
+              "type": "generator",
+              "description": "获取数据库会话",
+              "yields": "Session"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_database_connection"]
+      },
+      "related_feature": null,
+      "related_api": []
+    },
+    {
+      "id": "T003",
+      "title": "创建Supplier数据模型",
+      "priority": 3,
+      "status": "pending",
+      "dependencies": ["T002"],
+      "estimated_complexity": "low",
+      "implementation": {
+        "file_path": "backend/src/models/supplier.py",
+        "type": "create",
+        "description": "定义Supplier及相关数据模型",
+        "code_spec": {
+          "classes": [
+            {
+              "name": "Supplier",
+              "table_name": "suppliers",
+              "fields": [
+                {"name": "id", "type": "UUID", "primary_key": true},
+                {"name": "name", "type": "String(200)", "nullable": false},
+                {"name": "contact_person", "type": "String(50)"},
+                {"name": "contact_phone", "type": "String(20)"},
+                {"name": "contact_email", "type": "String(100)"},
+                {"name": "address", "type": "String(500)"},
+                {"name": "business_scope", "type": "Text"},
+                {"name": "rating", "type": "String(1)", "default": "'C'"},
+                {"name": "status", "type": "String(20)", "default": "'active'"}
+              ]
+            },
+            {
+              "name": "SupplierTag",
+              "table_name": "supplier_tags",
+              "fields": [
+                {"name": "id", "type": "UUID", "primary_key": true},
+                {"name": "name", "type": "String(50)", "unique": true}
+              ]
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_supplier_model"]
+      },
+      "related_feature": "F001, F002, F003",
+      "related_api": ["API001", "API002", "API003"]
+    },
+    {
+      "id": "T004",
+      "title": "创建Tender数据模型",
+      "priority": 4,
+      "status": "pending",
+      "dependencies": ["T002", "T003"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/models/tender.py",
+        "type": "create",
+        "description": "定义Tender及相关数据模型",
+        "code_spec": {
+          "classes": [
+            {
+              "name": "Tender",
+              "table_name": "tenders",
+              "fields": [
+                {"name": "id", "type": "UUID", "primary_key": true},
+                {"name": "title", "type": "String(200)", "nullable": false},
+                {"name": "description", "type": "Text"},
+                {"name": "requirements", "type": "Text"},
+                {"name": "budget", "type": "Decimal(15,2)"},
+                {"name": "deadline", "type": "DateTime", "nullable": false},
+                {"name": "status", "type": "String(20)", "default": "'draft'"},
+                {"name": "business_weight", "type": "Decimal(3,2)", "default": "0.4"},
+                {"name": "technical_weight", "type": "Decimal(3,2)", "default": "0.6"}
+              ]
+            },
+            {
+              "name": "TenderAttachment",
+              "table_name": "tender_attachments"
+            },
+            {
+              "name": "TenderInvitee",
+              "table_name": "tender_invitees"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_tender_model", "test_tender_status_transition"]
+      },
+      "related_feature": "F008, F009, F010, F011",
+      "related_api": ["API011", "API012", "API013"]
+    },
+    {
+      "id": "T005",
+      "title": "创建Bid数据模型",
+      "priority": 5,
+      "status": "pending",
+      "dependencies": ["T002", "T003", "T004"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/models/bid.py",
+        "type": "create",
+        "description": "定义Bid及相关数据模型",
+        "code_spec": {
+          "classes": [
+            {
+              "name": "Bid",
+              "table_name": "bids",
+              "fields": [
+                {"name": "id", "type": "UUID", "primary_key": true},
+                {"name": "tender_id", "type": "UUID", "foreign_key": "tenders.id"},
+                {"name": "supplier_id", "type": "UUID", "foreign_key": "suppliers.id"},
+                {"name": "quote_amount", "type": "Decimal(15,2)"},
+                {"name": "delivery_period", "type": "String(100)"},
+                {"name": "status", "type": "String(20)", "default": "'submitted'"}
+              ]
+            },
+            {
+              "name": "BidFile",
+              "table_name": "bid_files"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_bid_model"]
+      },
+      "related_feature": "F014, F015, F016",
+      "related_api": ["API019", "API020", "API021"]
+    },
+    {
+      "id": "T006",
+      "title": "创建Review数据模型",
+      "priority": 6,
+      "status": "pending",
+      "dependencies": ["T002", "T004", "T005"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/models/review.py",
+        "type": "create",
+        "description": "定义Review相关数据模型",
+        "code_spec": {
+          "classes": [
+            {
+              "name": "Reviewer",
+              "table_name": "reviewers",
+              "fields": [
+                {"name": "id", "type": "UUID", "primary_key": true},
+                {"name": "tender_id", "type": "UUID", "foreign_key": "tenders.id"},
+                {"name": "user_id", "type": "UUID", "foreign_key": "users.id"},
+                {"name": "review_type", "type": "String(20)"},
+                {"name": "status", "type": "String(20)", "default": "'pending'"}
+              ]
+            },
+            {
+              "name": "ReviewScore",
+              "table_name": "review_scores",
+              "fields": [
+                {"name": "id", "type": "UUID", "primary_key": true},
+                {"name": "reviewer_id", "type": "UUID", "foreign_key": "reviewers.id"},
+                {"name": "bid_id", "type": "UUID", "foreign_key": "bids.id"},
+                {"name": "price_score", "type": "Integer"},
+                {"name": "qualification_score", "type": "Integer"},
+                {"name": "experience_score", "type": "Integer"},
+                {"name": "service_score", "type": "Integer"},
+                {"name": "total_score", "type": "Decimal(5,2)"},
+                {"name": "comment", "type": "Text"},
+                {"name": "recommendation", "type": "String(20)"}
+              ]
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_reviewer_model", "test_review_score_model"]
+      },
+      "related_feature": "F019, F020, F022, F023",
+      "related_api": ["API023", "API026", "API029"]
+    },
+    {
+      "id": "T007",
+      "title": "创建User数据模型",
+      "priority": 7,
+      "status": "pending",
+      "dependencies": ["T002"],
+      "estimated_complexity": "low",
+      "implementation": {
+        "file_path": "backend/src/models/user.py",
+        "type": "create",
+        "description": "定义User数据模型",
+        "code_spec": {
+          "classes": [
+            {
+              "name": "User",
+              "table_name": "users",
+              "fields": [
+                {"name": "id", "type": "UUID", "primary_key": true},
+                {"name": "username", "type": "String(50)", "unique": true},
+                {"name": "email", "type": "String(100)", "unique": true},
+                {"name": "phone", "type": "String(20)"},
+                {"name": "dingtalk_user_id", "type": "String(100)", "unique": true},
+                {"name": "role", "type": "String(20)", "default": "'reviewer'"},
+                {"name": "status", "type": "String(20)", "default": "'active'"}
+              ]
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_user_model"]
+      },
+      "related_feature": "F037",
+      "related_api": ["API039", "API040"]
+    },
+    {
+      "id": "T008",
+      "title": "创建Pydantic Schema定义",
+      "priority": 8,
+      "status": "pending",
+      "dependencies": ["T003", "T004", "T005", "T006", "T007"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/schemas/",
+        "type": "create",
+        "description": "创建所有API请求响应的Schema定义",
+        "files_to_create": [
+          "backend/src/schemas/supplier.py",
+          "backend/src/schemas/tender.py",
+          "backend/src/schemas/bid.py",
+          "backend/src/schemas/review.py",
+          "backend/src/schemas/common.py"
+        ]
+      },
+      "test_requirements": {
+        "unit_tests": ["test_schema_validation"]
+      },
+      "related_feature": null,
+      "related_api": []
+    },
+    {
+      "id": "T009",
+      "title": "实现钉钉客户端",
+      "priority": 9,
+      "status": "pending",
+      "dependencies": ["T001", "T007"],
+      "estimated_complexity": "high",
+      "implementation": {
+        "file_path": "backend/src/external/dingtalk_client.py",
+        "type": "create",
+        "description": "实现钉钉开放平台API客户端",
+        "code_spec": {
+          "imports": [
+            "from dingtalk.sdk import DingTalkClient",
+            "import httpx"
+          ],
+          "class_name": "DingTalkService",
+          "methods": [
+            {
+              "name": "get_access_token",
+              "return_type": "str",
+              "description": "获取钉钉access_token"
+            },
+            {
+              "name": "get_department_list",
+              "return_type": "list",
+              "description": "获取部门列表"
+            },
+            {
+              "name": "get_department_users",
+              "parameters": [{"name": "dept_id", "type": "int"}],
+              "return_type": "list",
+              "description": "获取部门用户列表"
+            },
+            {
+              "name": "send_work_notice",
+              "parameters": [
+                {"name": "user_id", "type": "str"},
+                {"name": "message", "type": "dict"}
+              ],
+              "return_type": "dict",
+              "description": "发送工作通知消息"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_dingtalk_token", "test_dingtalk_departments"],
+        "integration_tests": ["test_dingtalk_real_api"]
+      },
+      "related_feature": "F019, F021, F026",
+      "related_api": ["API023", "API024", "API025"]
+    },
+    {
+      "id": "T010",
+      "title": "实现邮件客户端",
+      "priority": 10,
+      "status": "pending",
+      "dependencies": ["T001"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/external/email_client.py",
+        "type": "create",
+        "description": "实现邮件发送服务",
+        "code_spec": {
+          "imports": [
+            "import aiosmtplib",
+            "from email.mime.text import MIMEText",
+            "from email.mime.multipart import MIMEMultipart"
+          ],
+          "class_name": "EmailService",
+          "methods": [
+            {
+              "name": "send_tender_notice",
+              "parameters": [
+                {"name": "to_emails", "type": "list"},
+                {"name": "tender_info", "type": "dict"}
+              ],
+              "return_type": "bool",
+              "description": "发送标书通知邮件"
+            },
+            {
+              "name": "send_winner_notice",
+              "parameters": [
+                {"name": "to_email", "type": "str"},
+                {"name": "result_info", "type": "dict"}
+              ],
+              "return_type": "bool",
+              "description": "发送中标通知邮件"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_email_template", "test_email_send"]
+      },
+      "related_feature": "F012, F031",
+      "related_api": ["API018"]
+    },
+    {
+      "id": "T011",
+      "title": "实现供应商管理服务",
+      "priority": 11,
+      "status": "pending",
+      "dependencies": ["T003", "T008"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/services/supplier_service.py",
+        "type": "create",
+        "description": "实现供应商CRUD业务逻辑",
+        "code_spec": {
+          "class_name": "SupplierService",
+          "methods": [
+            {
+              "name": "create_supplier",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "data", "type": "SupplierCreate"}],
+              "return_type": "Supplier",
+              "description": "创建供应商"
+            },
+            {
+              "name": "update_supplier",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "supplier_id", "type": "UUID"}, {"name": "data", "type": "SupplierUpdate"}],
+              "return_type": "Supplier",
+              "description": "更新供应商"
+            },
+            {
+              "name": "get_suppliers",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "filters", "type": "dict"}],
+              "return_type": "list[Supplier]",
+              "description": "获取供应商列表（支持筛选）"
+            },
+            {
+              "name": "add_tag",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "supplier_id", "type": "UUID"}, {"name": "tag_name", "type": "str"}],
+              "return_type": "SupplierTag",
+              "description": "添加供应商标签"
+            },
+            {
+              "name": "update_rating",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "supplier_id", "type": "UUID"}, {"name": "rating", "type": "str"}],
+              "return_type": "Supplier",
+              "description": "更新供应商评级"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_create_supplier", "test_update_supplier", "test_filter_suppliers"],
+        "integration_tests": ["test_supplier_full_flow"]
+      },
+      "related_feature": "F001, F002, F003, F004, F006",
+      "related_api": ["API001", "API002", "API003", "API005", "API007"]
+    },
+    {
+      "id": "T012",
+      "title": "实现标书管理服务",
+      "priority": 12,
+      "status": "pending",
+      "dependencies": ["T004", "T008", "T010", "T011"],
+      "estimated_complexity": "high",
+      "implementation": {
+        "file_path": "backend/src/services/tender_service.py",
+        "type": "create",
+        "description": "实现标书创建、发布、邮件发送等业务逻辑",
+        "code_spec": {
+          "class_name": "TenderService",
+          "methods": [
+            {
+              "name": "create_tender",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "data", "type": "TenderCreate"}],
+              "return_type": "Tender",
+              "description": "创建标书草稿"
+            },
+            {
+              "name": "publish_tender",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}, {"name": "email_config", "type": "dict"}],
+              "return_type": "dict",
+              "description": "发布标书并发送邮件给供应商"
+            },
+            {
+              "name": "select_invitees",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}, {"name": "supplier_ids", "type": "list[UUID]"}],
+              "return_type": "list[TenderInvitee]",
+              "description": "选择邀请供应商"
+            },
+            {
+              "name": "upload_attachment",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}, {"name": "file", "type": "UploadFile"}],
+              "return_type": "TenderAttachment",
+              "description": "上传标书附件"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_create_tender", "test_publish_tender"],
+        "integration_tests": ["test_tender_publish_flow"]
+      },
+      "related_feature": "F008, F009, F010, F011, F012",
+      "related_api": ["API011", "API012", "API015", "API017", "API018"]
+    },
+    {
+      "id": "T013",
+      "title": "实现应标管理服务",
+      "priority": 13,
+      "status": "pending",
+      "dependencies": ["T005", "T008", "T012"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/services/bid_service.py",
+        "type": "create",
+        "description": "实现应标提交、文件上传等业务逻辑",
+        "code_spec": {
+          "class_name": "BidService",
+          "methods": [
+            {
+              "name": "validate_invite_token",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "token", "type": "str"}],
+              "return_type": "TenderInvitee",
+              "description": "验证应标邀请令牌"
+            },
+            {
+              "name": "submit_bid",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "invite_token", "type": "str"}, {"name": "data", "type": "BidCreate"}],
+              "return_type": "Bid",
+              "description": "提交应标"
+            },
+            {
+              "name": "upload_bid_file",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "bid_id", "type": "UUID"}, {"name": "file", "type": "UploadFile"}, {"name": "file_type", "type": "str"}],
+              "return_type": "BidFile",
+              "description": "上传应标文件（商务/技术）"
+            },
+            {
+              "name": "get_bids_by_tender",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}],
+              "return_type": "list[Bid]",
+              "description": "获取标书的所有应标"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_validate_token", "test_submit_bid"],
+        "integration_tests": ["test_bid_submission_flow"]
+      },
+      "related_feature": "F014, F015, F016, F017",
+      "related_api": ["API019", "API020", "API021"]
+    },
+    {
+      "id": "T014",
+      "title": "实现评审管理服务",
+      "priority": 14,
+      "status": "pending",
+      "dependencies": ["T006", "T009", "T012"],
+      "estimated_complexity": "high",
+      "implementation": {
+        "file_path": "backend/src/services/review_service.py",
+        "type": "create",
+        "description": "实现评审人员指派、评分收集、进度跟踪等业务逻辑",
+        "code_spec": {
+          "class_name": "ReviewService",
+          "methods": [
+            {
+              "name": "assign_reviewers",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}, {"name": "reviewers", "type": "list[dict]"}],
+              "return_type": "list[Reviewer]",
+              "description": "指派评审人员"
+            },
+            {
+              "name": "start_review",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}],
+              "return_type": "dict",
+              "description": "启动评审，发送钉钉通知"
+            },
+            {
+              "name": "submit_score",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "reviewer_id", "type": "UUID"}, {"name": "bid_id", "type": "UUID"}, {"name": "score_data", "type": "ScoreCreate"}],
+              "return_type": "ReviewScore",
+              "description": "提交评审评分"
+            },
+            {
+              "name": "get_review_progress",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}],
+              "return_type": "dict",
+              "description": "获取评审进度"
+            },
+            {
+              "name": "remind_reviewers",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}],
+              "return_type": "int",
+              "description": "催办未完成评审的人员，返回催办数量"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_assign_reviewers", "test_submit_score"],
+        "integration_tests": ["test_review_flow"]
+      },
+      "related_feature": "F020, F021, F022, F023, F025, F026",
+      "related_api": ["API026", "API027", "API029", "API030", "API031"]
+    },
+    {
+      "id": "T015",
+      "title": "实现中标管理服务",
+      "priority": 15,
+      "status": "pending",
+      "dependencies": ["T006", "T013", "T014"],
+      "estimated_complexity": "high",
+      "implementation": {
+        "file_path": "backend/src/services/result_service.py",
+        "type": "create",
+        "description": "实现评分汇总、推荐名单生成、审核、公示等业务逻辑",
+        "code_spec": {
+          "class_name": "ResultService",
+          "methods": [
+            {
+              "name": "calculate_summary",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}],
+              "return_type": "list[dict]",
+              "description": "计算评分汇总，返回排序结果"
+            },
+            {
+              "name": "set_weights",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}, {"name": "business_weight", "type": "float"}, {"name": "technical_weight", "type": "float"}],
+              "return_type": "Tender",
+              "description": "设置评分权重"
+            },
+            {
+              "name": "approve_result",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}, {"name": "winner_bid_id", "type": "UUID"}, {"name": "approver_id", "type": "UUID"}],
+              "return_type": "BidResult",
+              "description": "审核中标结果"
+            },
+            {
+              "name": "announce_result",
+              "parameters": [{"name": "db", "type": "Session"}, {"name": "tender_id", "type": "UUID"}],
+              "return_type": "dict",
+              "description": "公示中标结果，发送邮件通知"
+            }
+          ]
+        }
+      },
+      "test_requirements": {
+        "unit_tests": ["test_calculate_summary", "test_approve_result"],
+        "integration_tests": ["test_result_flow"]
+      },
+      "related_feature": "F027, F028, F029, F030, F031",
+      "related_api": ["API032", "API033", "API034", "API035", "API036"]
+    },
+    {
+      "id": "T016",
+      "title": "实现供应商API路由",
+      "priority": 16,
+      "status": "pending",
+      "dependencies": ["T011"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/api/routes/suppliers.py",
+        "type": "create",
+        "description": "实现供应商管理的API接口（API001-API010）",
+        "code_spec": {
+          "endpoints": [
+            {"method": "POST", "path": "/", "handler": "create_supplier"},
+            {"method": "PUT", "path": "/{id}", "handler": "update_supplier"},
+            {"method": "GET", "path": "/", "handler": "list_suppliers"},
+            {"method": "GET", "path": "/{id}", "handler": "get_supplier"},
+            {"method": "POST", "path": "/{id}/tags", "handler": "add_tag"},
+            {"method": "DELETE", "path": "/{id}/tags/{tag_id}", "handler": "remove_tag"},
+            {"method": "PUT", "path": "/{id}/rating", "handler": "update_rating"}
+          ]
+        }
+      },
+      "test_requirements": {
+        "integration_tests": ["test_supplier_api_endpoints"]
+      },
+      "related_feature": "F001-F006",
+      "related_api": ["API001-API007"]
+    },
+    {
+      "id": "T017",
+      "title": "实现标书API路由",
+      "priority": 17,
+      "status": "pending",
+      "dependencies": ["T012"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/api/routes/tenders.py",
+        "type": "create",
+        "description": "实现标书管理的API接口（API011-API018）",
+        "code_spec": {
+          "endpoints": [
+            {"method": "POST", "path": "/", "handler": "create_tender"},
+            {"method": "PUT", "path": "/{id}", "handler": "update_tender"},
+            {"method": "GET", "path": "/", "handler": "list_tenders"},
+            {"method": "GET", "path": "/{id}", "handler": "get_tender"},
+            {"method": "POST", "path": "/{id}/attachments", "handler": "upload_attachment"},
+            {"method": "POST", "path": "/{id}/invitees", "handler": "select_invitees"},
+            {"method": "POST", "path": "/{id}/publish", "handler": "publish_tender"}
+          ]
+        }
+      },
+      "test_requirements": {
+        "integration_tests": ["test_tender_api_endpoints"]
+      },
+      "related_feature": "F008-F013",
+      "related_api": ["API011-API018"]
+    },
+    {
+      "id": "T018",
+      "title": "实现应标API路由",
+      "priority": 18,
+      "status": "pending",
+      "dependencies": ["T013"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/api/routes/bids.py",
+        "type": "create",
+        "description": "实现应标管理的API接口（API019-API022）",
+        "code_spec": {
+          "endpoints": [
+            {"method": "GET", "path": "/submit/{token}", "handler": "get_bid_form", "auth": false},
+            {"method": "POST", "path": "/", "handler": "submit_bid", "auth": false},
+            {"method": "GET", "path": "/tender/{tender_id}", "handler": "list_bids"},
+            {"method": "GET", "path": "/{id}", "handler": "get_bid_detail"}
+          ]
+        }
+      },
+      "test_requirements": {
+        "integration_tests": ["test_bid_api_endpoints"]
+      },
+      "related_feature": "F014-F018",
+      "related_api": ["API019-API022"]
+    },
+    {
+      "id": "T019",
+      "title": "实现评审API路由",
+      "priority": 19,
+      "status": "pending",
+      "dependencies": ["T014", "T009"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/api/routes/reviews.py",
+        "type": "create",
+        "description": "实现评审管理的API接口（API023-API031）",
+        "code_spec": {
+          "endpoints": [
+            {"method": "POST", "path": "/dingtalk/sync", "handler": "sync_dingtalk"},
+            {"method": "GET", "path": "/dingtalk/departments", "handler": "get_departments"},
+            {"method": "GET", "path": "/dingtalk/users", "handler": "get_users"},
+            {"method": "POST", "path": "/tender/{id}/reviewers", "handler": "assign_reviewers"},
+            {"method": "POST", "path": "/tender/{id}/start-review", "handler": "start_review"},
+            {"method": "GET", "path": "/my", "handler": "get_my_reviews"},
+            {"method": "POST", "path": "/{id}/score", "handler": "submit_score"},
+            {"method": "GET", "path": "/tender/{id}/progress", "handler": "get_progress"},
+            {"method": "POST", "path": "/tender/{id}/remind", "handler": "remind_reviewers"}
+          ]
+        }
+      },
+      "test_requirements": {
+        "integration_tests": ["test_review_api_endpoints"]
+      },
+      "related_feature": "F019-F026",
+      "related_api": ["API023-API031"]
+    },
+    {
+      "id": "T020",
+      "title": "实现中标API路由",
+      "priority": 20,
+      "status": "pending",
+      "dependencies": ["T015"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "backend/src/api/routes/results.py",
+        "type": "create",
+        "description": "实现中标管理的API接口（API032-API036）",
+        "code_spec": {
+          "endpoints": [
+            {"method": "POST", "path": "/tender/{id}/summary", "handler": "calculate_summary"},
+            {"method": "PUT", "path": "/tender/{id}/weights", "handler": "set_weights"},
+            {"method": "GET", "path": "/tender/{id}/recommendation", "handler": "get_recommendation"},
+            {"method": "POST", "path": "/tender/{id}/approve", "handler": "approve_result"},
+            {"method": "POST", "path": "/tender/{id}/announce", "handler": "announce_result"}
+          ]
+        }
+      },
+      "test_requirements": {
+        "integration_tests": ["test_result_api_endpoints"]
+      },
+      "related_feature": "F027-F031",
+      "related_api": ["API032-API036"]
+    },
+    {
+      "id": "T021",
+      "title": "实现前端供应商管理页面",
+      "priority": 21,
+      "status": "pending",
+      "dependencies": ["T016"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "frontend/src/pages/suppliers/",
+        "type": "create",
+        "description": "实现供应商管理前端页面",
+        "files_to_create": [
+          "frontend/src/pages/suppliers/index.tsx",
+          "frontend/src/pages/suppliers/SupplierForm.tsx",
+          "frontend/src/pages/suppliers/SupplierDetail.tsx",
+          "frontend/src/services/supplierService.ts"
+        ]
+      },
+      "test_requirements": {
+        "e2e_tests": ["test_supplier_ui_flow"]
+      },
+      "related_feature": "F001-F007",
+      "related_api": ["API001-API010"]
+    },
+    {
+      "id": "T022",
+      "title": "实现前端标书管理页面",
+      "priority": 22,
+      "status": "pending",
+      "dependencies": ["T017"],
+      "estimated_complexity": "high",
+      "implementation": {
+        "file_path": "frontend/src/pages/tenders/",
+        "type": "create",
+        "description": "实现标书管理前端页面",
+        "files_to_create": [
+          "frontend/src/pages/tenders/index.tsx",
+          "frontend/src/pages/tenders/TenderForm.tsx",
+          "frontend/src/pages/tenders/TenderDetail.tsx",
+          "frontend/src/pages/tenders/SupplierSelector.tsx",
+          "frontend/src/services/tenderService.ts"
+        ]
+      },
+      "test_requirements": {
+        "e2e_tests": ["test_tender_ui_flow"]
+      },
+      "related_feature": "F008-F013",
+      "related_api": ["API011-API018"]
+    },
+    {
+      "id": "T023",
+      "title": "实现前端评审中心页面",
+      "priority": 23,
+      "status": "pending",
+      "dependencies": ["T019"],
+      "estimated_complexity": "high",
+      "implementation": {
+        "file_path": "frontend/src/pages/reviews/",
+        "type": "create",
+        "description": "实现评审中心前端页面",
+        "files_to_create": [
+          "frontend/src/pages/reviews/index.tsx",
+          "frontend/src/pages/reviews/ReviewForm.tsx",
+          "frontend/src/pages/reviews/ReviewProgress.tsx",
+          "frontend/src/pages/reviews/ReviewerSelector.tsx",
+          "frontend/src/services/reviewService.ts"
+        ]
+      },
+      "test_requirements": {
+        "e2e_tests": ["test_review_ui_flow"]
+      },
+      "related_feature": "F019-F026",
+      "related_api": ["API023-API031"]
+    },
+    {
+      "id": "T024",
+      "title": "实现前端中标管理页面",
+      "priority": 24,
+      "status": "pending",
+      "dependencies": ["T020"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "frontend/src/pages/results/",
+        "type": "create",
+        "description": "实现中标管理前端页面",
+        "files_to_create": [
+          "frontend/src/pages/results/index.tsx",
+          "frontend/src/pages/results/ScoreSummary.tsx",
+          "frontend/src/pages/results/RecommendationList.tsx",
+          "frontend/src/services/resultService.ts"
+        ]
+      },
+      "test_requirements": {
+        "e2e_tests": ["test_result_ui_flow"]
+      },
+      "related_feature": "F027-F031",
+      "related_api": ["API032-API036"]
+    },
+    {
+      "id": "T025",
+      "title": "实现供应商应标页面（公开）",
+      "priority": 25,
+      "status": "pending",
+      "dependencies": ["T018"],
+      "estimated_complexity": "medium",
+      "implementation": {
+        "file_path": "frontend/src/pages/bid-submit/",
+        "type": "create",
+        "description": "实现供应商应标提交页面（无需登录）",
+        "files_to_create": [
+          "frontend/src/pages/bid-submit/index.tsx",
+          "frontend/src/pages/bid-submit/BidForm.tsx",
+          "frontend/src/pages/bid-submit/FileUpload.tsx"
+        ]
+      },
+      "test_requirements": {
+        "e2e_tests": ["test_bid_submit_flow"]
+      },
+      "related_feature": "F014-F016",
+      "related_api": ["API019", "API020"]
+    }
+  ],
+  "task_groups": [
+    {
+      "name": "基础设施",
+      "task_ids": ["T001", "T002"],
+      "can_parallel": false
+    },
+    {
+      "name": "数据模型层",
+      "task_ids": ["T003", "T004", "T005", "T006", "T007"],
+      "can_parallel": true
+    },
+    {
+      "name": "Schema层",
+      "task_ids": ["T008"],
+      "can_parallel": false,
+      "depends_on": "数据模型层"
+    },
+    {
+      "name": "外部集成",
+      "task_ids": ["T009", "T010"],
+      "can_parallel": true
+    },
+    {
+      "name": "服务层",
+      "task_ids": ["T011", "T012", "T013", "T014", "T015"],
+      "can_parallel": true,
+      "depends_on": "数据模型层, Schema层"
+    },
+    {
+      "name": "API层",
+      "task_ids": ["T016", "T017", "T018", "T019", "T020"],
+      "can_parallel": true,
+      "depends_on": "服务层"
+    },
+    {
+      "name": "前端页面",
+      "task_ids": ["T021", "T022", "T023", "T024", "T025"],
+      "can_parallel": true,
+      "depends_on": "API层"
+    }
+  ],
+  "execution_order": ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T008", "T009", "T010", "T011", "T012", "T013", "T014", "T015", "T016", "T017", "T018", "T019", "T020", "T021", "T022", "T023", "T024", "T025"]
+}
