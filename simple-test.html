@@ -1,0 +1,50 @@
+
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Simple Test&lt;/title&gt;
+    &lt;style&gt;
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            text-align: center;
+            background-color: #f0f2f5;
+        }
+        h1 {
+            color: #1890ff;
+            font-size: 36px;
+        }
+        .success {
+            color: #52c41a;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .info {
+            color: #666;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .box {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="box"&gt;
+        &lt;h1&gt;招标管理系统&lt;/h1&gt;
+        &lt;p class="success"&gt;🎉 测试页面正常！&lt;/p&gt;
+        &lt;p class="info"&gt;如果你能看到这个页面，说明HTML渲染是正常的！&lt;/p&gt;
+        &lt;p class="info"&gt;当前时间: &lt;span id="time"&gt;&lt;/span&gt;&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        document.getElementById('time').textContent = new Date().toLocaleString('zh-CN');
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
