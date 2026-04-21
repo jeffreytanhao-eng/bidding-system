@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>招标管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 600px;
+        }
+        h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        .success {
+            color: #52c41a;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .info {
+            color: #666;
+            font-size: 16px;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .status {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #e6f7ff;
+            color: #1890ff;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .time {
+            color: #999;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ 招标管理系统</h1>
+        <div class="status">✅ 系统运行正常</div>
+        <p class="success">🎉 恭喜！后端服务已成功启动！</p>
+        <p class="info">这是一个完整的招标管理系统</p>
+        <p class="info">支持供应商管理、标书管理、应标管理、评审管理和中标管理</p>
+        <p class="info">技术栈：Python 3.11 + FastAPI + SQLAlchemy</p>
+        <p class="time">当前时间：{{ current_time }}</p>
+    </div>
+</body>
+</html>

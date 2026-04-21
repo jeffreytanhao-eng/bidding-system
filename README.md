@@ -6,7 +6,7 @@
 ## 技术栈
 
 - **后端**: Python 3.11 + FastAPI + SQLAlchemy
-- **前端**: React 18 + TypeScript + Ant Design
+- **前端**: Jinja2 模板 + HTML/CSS（内置）
 - **数据库**: PostgreSQL 15
 - **外部集成**: 钉钉API、邮件服务
 
@@ -14,8 +14,9 @@
 
 ```
 招标管理系统/
-├── backend/              # 后端项目
+├── backend/              # 后端项目（内置前端）
 │   ├── src/
+│   │   ├── templates/    # Jinja2 模板
 │   │   ├── api/routes/   # API路由
 │   │   ├── services/     # 业务服务
 │   │   ├── models/       # 数据模型
@@ -26,12 +27,7 @@
 │   │   └── main.py       # 应用入口
 │   ├── requirements.txt
 │   └── alembic.ini
-├── frontend/             # 前端项目
-│   ├── src/
-│   │   ├── pages/        # 页面组件
-│   │   └── services/     # API服务
-│   ├── package.json
-│   └── index.html
+├── frontend/             # 旧版前端（备用）
 ├── PRD.md               # 产品需求
 ├── TASKS.json           # 任务清单
 ├── TECH_DESIGN.md       # 技术设计
@@ -71,7 +67,7 @@
 
 ## 快速开始
 
-### 后端
+### 后端（内置前端）
 
 ```bash
 cd backend
@@ -79,13 +75,7 @@ pip install -r requirements.txt
 python -m uvicorn src.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 前端
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
+启动后访问：http://127.0.0.1:8000
 
 ## API文档
 
