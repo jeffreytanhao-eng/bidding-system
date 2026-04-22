@@ -146,9 +146,9 @@ class ReviewService:
                 ReviewScore.reviewer_id == reviewer.id
             ).count()
             
-            if scores_count &gt;= len(bids):
+            if scores_count >= len(bids):
                 completed_count += 1
-            elif scores_count &gt; 0:
+            elif scores_count > 0:
                 in_progress_count += 1
         
         return {

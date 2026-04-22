@@ -41,7 +41,7 @@ class ScoreCreate(BaseModel):
     @field_validator('price_score', 'qualification_score', 'experience_score', 'service_score')
     @classmethod
     def validate_score_range(cls, v):
-        if v is not None and (v &lt; 0 or v &gt; 100):
+        if v is not None and (v < 0 or v > 100):
             raise ValueError('评分必须在0-100之间')
         return v
 

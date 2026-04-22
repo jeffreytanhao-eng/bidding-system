@@ -22,7 +22,7 @@ class ResultService:
         
         for reviewer in reviewers:
             scores_count = db.query(ReviewScore).filter(ReviewScore.reviewer_id == reviewer.id).count()
-            if scores_count &lt; len(bids):
+            if scores_count < len(bids):
                 raise ValueError("存在未完成的评审")
         
         results = []
@@ -72,7 +72,7 @@ class ResultService:
 
     @staticmethod
     def set_weights(db, tender_id, business_weight, technical_weight):
-        if abs(business_weight + technical_weight - 1.0) &gt; 0.001:
+        if abs(business_weight + technical_weight - 1.0) > 0.001:
             raise ValueError("权重和必须等于1")
         
         tender = db.query(Tender).filter(Tender.id == tender_id).first()

@@ -25,7 +25,7 @@ class BidService:
         if not tender:
             raise ValueError("标书不存在")
         
-        if datetime.now() &gt; tender.deadline:
+        if datetime.now() > tender.deadline:
             raise ValueError("已超过应标截止时间")
         
         existing_bid = db.query(Bid).filter(

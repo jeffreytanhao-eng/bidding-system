@@ -1,5 +1,169 @@
 {% extends "base.html" %}
 {% block title %}标书管理{% endblock %}
+{% block extra_css %}
+<style>
+.tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+}
+.tab-bar .tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+.tab-bar .tab:hover { color: var(--primary); }
+.tab-bar .tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 48px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #fafafa;
+}
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--primary);
+    background: #e6f7ff;
+}
+.upload-zone .upload-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+.upload-zone .upload-text {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.upload-zone .upload-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.upload-progress {
+    margin-top: 16px;
+    display: none;
+}
+.upload-progress .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.upload-progress .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 0%;
+}
+.extract-result {
+    margin-top: 24px;
+    display: none;
+}
+.extract-result .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.extract-result .result-header h3 {
+    color: var(--success);
+    font-size: 16px;
+}
+.extract-field {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: #f6ffed;
+    border-radius: 6px;
+    border-left: 3px solid var(--success);
+}
+.extract-field.auto {
+    background: #f6ffed;
+    border-left-color: var(--success);
+}
+.extract-field.manual {
+    background: #fff7e6;
+    border-left-color: var(--warning);
+}
+.extract-field .field-label {
+    min-width: 100px;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+    padding-top: 4px;
+}
+.extract-field .field-value {
+    flex: 1;
+}
+.extract-field .field-value input,
+.extract-field .field-value textarea,
+.extract-field .field-value select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+}
+.extract-field .field-value input:focus,
+.extract-field .field-value textarea:focus,
+.extract-field .field-value select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+}
+.extract-field .field-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+.extract-field .field-tag.auto-tag {
+    background: #f6ffed;
+    color: var(--success);
+}
+.extract-field .field-tag.manual-tag {
+    background: #fff7e6;
+    color: var(--warning);
+}
+.raw-text-toggle {
+    margin-top: 12px;
+    text-align: center;
+}
+.raw-text-box {
+    margin-top: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f5f5f5;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #666;
+    white-space: pre-wrap;
+    display: none;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>📋 标书管理</h1>
@@ -42,7 +206,10 @@
                 <option value="cancelled">已取消</option>
             </select>
         </div>
-        <button class="btn btn-primary" onclick="showAddModal()">+ 新建标书</button>
+        <div style="display:flex; gap:8px;">
+            <button class="btn btn-warning" onclick="showUploadModal()">📄 上传标书文件</button>
+            <button class="btn btn-primary" onclick="showAddModal()">+ 手动新建</button>
+        </div>
     </div>
 
     <table id="tenderTable">
@@ -92,7 +259,10 @@
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
                         <p>暂无标书数据</p>
-                        <button class="btn btn-primary" onclick="showAddModal()" style="margin-top:16px;">+ 新建标书</button>
+                        <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
+                            <button class="btn btn-warning" onclick="showUploadModal()">📄 上传标书文件</button>
+                            <button class="btn btn-primary" onclick="showAddModal()">+ 手动新建</button>
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -104,8 +274,8 @@
 <div class="modal-overlay" id="addModal">
     <div class="modal">
         <div class="modal-header">
-            <h3 id="modalTitle">新建标书</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h3 id="modalTitle">手动新建标书</h3>
+            <button class="modal-close" onclick="closeAddModal()">&times;</button>
         </div>
         <div class="modal-body">
             <form id="tenderForm">
@@ -142,8 +312,67 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeModal()">取消</button>
+            <button class="btn btn-outline" onclick="closeAddModal()">取消</button>
             <button class="btn btn-primary" onclick="saveTender()">保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="uploadModal">
+    <div class="modal" style="width:700px;">
+        <div class="modal-header">
+            <h3>📄 上传标书文件</h3>
+            <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="tab-bar">
+                <button class="tab active" onclick="switchTab('upload')">上传文件</button>
+                <button class="tab" onclick="switchTab('extract')">提取结果</button>
+            </div>
+
+            <div id="tab-upload" class="tab-content active">
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">点击或拖拽文件到此区域上传</div>
+                    <div class="upload-hint">支持 PDF、Word、Excel、TXT 格式，最大 50MB</div>
+                </div>
+                <input type="file" id="fileInput" style="display:none" accept=".pdf,.docx,.doc,.xlsx,.xls,.txt" onchange="handleFileSelect(event)">
+
+                <div class="upload-progress" id="uploadProgress">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span id="uploadFileName" style="font-size:13px; color:#666;"></span>
+                        <span id="uploadPercent" style="font-size:13px; color:#1890ff;"></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-extract" class="tab-content">
+                <div class="extract-result" id="extractResult">
+                    <div class="result-header">
+                        <h3>✅ 信息提取完成</h3>
+                        <span style="font-size:12px; color:#999;" id="extractFileName"></span>
+                    </div>
+
+                    <div id="extractFields"></div>
+
+                    <div class="raw-text-toggle">
+                        <button class="btn btn-outline" onclick="toggleRawText()" style="font-size:12px;">查看原始提取文本</button>
+                    </div>
+                    <div class="raw-text-box" id="rawTextBox"></div>
+                </div>
+
+                <div id="noExtract" style="text-align:center; padding:40px; color:#999;">
+                    <div style="font-size:36px; margin-bottom:12px;">📄</div>
+                    <p>请先上传标书文件</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeUploadModal()">取消</button>
+            <button class="btn btn-primary" id="confirmUploadBtn" onclick="confirmUpload()" style="display:none;">确认并创建标书</button>
         </div>
     </div>
 </div>
@@ -151,6 +380,8 @@
 
 {% block extra_js %}
 <script>
+let extractedData = null;
+
 function filterTable() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     const status = document.getElementById('statusFilter').value;
@@ -165,14 +396,196 @@ function filterTable() {
 }
 
 function showAddModal() {
-    document.getElementById('modalTitle').textContent = '新建标书';
+    document.getElementById('modalTitle').textContent = '手动新建标书';
     document.getElementById('tenderForm').reset();
     document.getElementById('tenderId').value = '';
     document.getElementById('addModal').classList.add('show');
 }
 
-function closeModal() {
+function closeAddModal() {
     document.getElementById('addModal').classList.remove('show');
+}
+
+function showUploadModal() {
+    extractedData = null;
+    document.getElementById('extractResult').style.display = 'none';
+    document.getElementById('noExtract').style.display = 'block';
+    document.getElementById('confirmUploadBtn').style.display = 'none';
+    document.getElementById('uploadProgress').style.display = 'none';
+    document.getElementById('fileInput').value = '';
+    switchTab('upload');
+    document.getElementById('uploadModal').classList.add('show');
+}
+
+function closeUploadModal() {
+    document.getElementById('uploadModal').classList.remove('show');
+}
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    if (tabName === 'upload') {
+        document.querySelector('.tab-bar .tab:first-child').classList.add('active');
+        document.getElementById('tab-upload').classList.add('active');
+    } else {
+        document.querySelector('.tab-bar .tab:last-child').classList.add('active');
+        document.getElementById('tab-extract').classList.add('active');
+    }
+}
+
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+});
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+});
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length > 0) {
+        uploadFile(e.dataTransfer.files[0]);
+    }
+});
+
+function handleFileSelect(event) {
+    if (event.target.files.length > 0) {
+        uploadFile(event.target.files[0]);
+    }
+}
+
+function uploadFile(file) {
+    const progress = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('progressFill');
+    const fileName = document.getElementById('uploadFileName');
+    const percent = document.getElementById('uploadPercent');
+
+    progress.style.display = 'block';
+    fileName.textContent = file.name;
+    progressFill.style.width = '0%';
+    percent.textContent = '0%';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/tenders/upload');
+
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progressFill.style.width = pct + '%';
+            percent.textContent = pct + '%';
+        }
+    };
+
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            const resp = JSON.parse(xhr.responseText);
+            if (resp.success) {
+                extractedData = resp.data;
+                renderExtractResult(resp.data);
+                switchTab('extract');
+                document.getElementById('confirmUploadBtn').style.display = 'inline-block';
+            } else {
+                alert('解析失败: ' + (resp.error || '未知错误'));
+            }
+        } else {
+            try {
+                const resp = JSON.parse(xhr.responseText);
+                alert('上传失败: ' + (resp.error || '未知错误'));
+            } catch {
+                alert('上传失败');
+            }
+        }
+    };
+
+    xhr.onerror = () => alert('网络错误，上传失败');
+    xhr.send(formData);
+}
+
+function renderExtractResult(data) {
+    document.getElementById('noExtract').style.display = 'none';
+    document.getElementById('extractResult').style.display = 'block';
+    document.getElementById('extractFileName').textContent = '文件: ' + (data.filename || '');
+
+    const fields = [
+        { key: 'tender_no', label: '标书编号', type: 'text', auto: !!data.tender_no },
+        { key: 'title', label: '标书名称', type: 'text', auto: !!data.title },
+        { key: 'budget', label: '预算金额 (元)', type: 'number', auto: !!data.budget },
+        { key: 'deadline', label: '投标截止时间', type: 'text', auto: !!data.deadline },
+        { key: 'procurement_method', label: '采购方式', type: 'select', auto: !!data.procurement_method },
+        { key: 'description', label: '项目描述', type: 'textarea', auto: !!data.description },
+    ];
+
+    const container = document.getElementById('extractFields');
+    container.innerHTML = '';
+
+    fields.forEach(field => {
+        const div = document.createElement('div');
+        div.className = 'extract-field ' + (field.auto ? 'auto' : 'manual');
+
+        let inputHtml = '';
+        const val = data[field.key] || '';
+        if (field.type === 'textarea') {
+            inputHtml = `<textarea id="ext_${field.key}" rows="3">${val}</textarea>`;
+        } else if (field.type === 'select') {
+            inputHtml = `
+                <select id="ext_${field.key}">
+                    <option value="public_bidding" ${val === 'public_bidding' ? 'selected' : ''}>公开招标</option>
+                    <option value="invited_bidding" ${val === 'invited_bidding' ? 'selected' : ''}>邀请招标</option>
+                    <option value="competitive_negotiation" ${val === 'competitive_negotiation' ? 'selected' : ''}>竞争性谈判</option>
+                    <option value="single_source" ${val === 'single_source' ? 'selected' : ''}>单一来源</option>
+                    <option value="competitive_consultation" ${val === 'competitive_consultation' ? 'selected' : ''}>竞争性磋商</option>
+                    <option value="inquiry" ${val === 'inquiry' ? 'selected' : ''}>询价</option>
+                </select>`;
+        } else if (field.type === 'number') {
+            inputHtml = `<input type="number" id="ext_${field.key}" value="${val}" step="0.01">`;
+        } else {
+            inputHtml = `<input type="text" id="ext_${field.key}" value="${val}">`;
+        }
+
+        div.innerHTML = `
+            <div class="field-label">${field.label}</div>
+            <div class="field-value">${inputHtml}</div>
+            <span class="field-tag ${field.auto ? 'auto-tag' : 'manual-tag'}">${field.auto ? '✅ 自动提取' : '✏️ 需手动填写'}</span>
+        `;
+        container.appendChild(div);
+    });
+
+    if (data.extracted_text) {
+        document.getElementById('rawTextBox').textContent = data.extracted_text;
+    }
+}
+
+function toggleRawText() {
+    const box = document.getElementById('rawTextBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function confirmUpload() {
+    if (!extractedData) return;
+    const data = {
+        tender_no: document.getElementById('ext_tender_no').value,
+        title: document.getElementById('ext_title').value,
+        budget: parseFloat(document.getElementById('ext_budget').value) || 0,
+        deadline: document.getElementById('ext_deadline').value,
+        procurement_method: document.getElementById('ext_procurement_method').value,
+        description: document.getElementById('ext_description').value,
+    };
+    if (!data.title) {
+        alert('请填写标书名称');
+        return;
+    }
+    fetch('/api/v1/tenders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(() => { closeUploadModal(); window.location.reload(); })
+    .catch(() => alert('创建失败'));
 }
 
 function editTender(id) {
@@ -212,7 +625,7 @@ function saveTender() {
         body: JSON.stringify(data)
     })
     .then(r => r.json())
-    .then(() => { closeModal(); window.location.reload(); })
+    .then(() => { closeAddModal(); window.location.reload(); })
     .catch(() => alert('保存失败'));
 }
 </script>
