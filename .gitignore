@@ -60,5 +60,8 @@ backend/data/
 .DS_Store
 Thumbs.db
 
+# Vercel
+.vercel/
+
 # Alembic
 alembic/versions/*.pyc

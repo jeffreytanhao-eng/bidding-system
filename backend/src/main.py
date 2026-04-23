@@ -1,11 +1,10 @@
 
 import os
-import shutil
+import tempfile
 from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from src.config.settings import get_settings
 from src.services.tender_parser import tender_parser
 from src.utils.database import create_tables
@@ -36,14 +35,8 @@ app.include_router(reviews.router, prefix=settings.API_V1_STR)
 app.include_router(results.router, prefix=settings.API_V1_STR)
 app.include_router(users.router, prefix=settings.API_V1_STR)
 
-templates_path = Path(__file__).parent / "templates"
-templates = Jinja2Templates(directory=str(templates_path))
-
-upload_dir = Path(__file__).parent.parent / "uploads"
-upload_dir.mkdir(exist_ok=True)
-
-static_dir = Path(__file__).parent / "static"
-static_dir.mkdir(exist_ok=True)
+_templates_dir = Path(__file__).parent / "templates"
+templates = Jinja2Templates(directory=str(_templates_dir))
 
 
 @app.on_event("startup")
@@ -55,12 +48,7 @@ def on_startup():
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    stats = {
-        "suppliers": 0,
-        "tenders": 0,
-        "bids": 0,
-        "results": 0
-    }
+    stats = {"suppliers": 0, "tenders": 0, "bids": 0, "results": 0}
     try:
         from src.utils.database import SessionLocal
         from src.models.supplier import Supplier
@@ -161,16 +149,18 @@ async def upload_tender_file(file: UploadFile = File(...)):
     if len(file_content) > 50 * 1024 * 1024:
         return JSONResponse(status_code=400, content={"error": "文件大小不能超过50MB"})
 
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    safe_filename = f"{timestamp}_{file.filename}"
-    file_path = upload_dir / safe_filename
-    with open(file_path, "wb") as f:
-        f.write(file_content)
-
     text = tender_parser.extract_text(file_content, file.filename)
     info = tender_parser.parse_tender_info(text)
     info["filename"] = file.filename
-    info["saved_path"] = str(file_path)
+
+    blob_token = os.environ.get("BLOB_READ_WRITE_TOKEN", "")
+    if blob_token:
+        try:
+            from vercel_blob import upload
+            blob = upload(file_content, file.filename, token=blob_token)
+            info["saved_url"] = blob["url"]
+        except Exception:
+            pass
 
     return JSONResponse(content={"success": True, "data": info})
 
