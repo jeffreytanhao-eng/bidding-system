@@ -38,6 +38,26 @@ app.include_router(users.router, prefix=settings.API_V1_STR)
 _templates_dir = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(_templates_dir))
 
+_template_api_checked = False
+_template_needs_request = False
+
+
+def _render(template_name: str, request: Request, context: dict):
+    global _template_api_checked, _template_needs_request
+    context["request"] = request
+
+    if not _template_api_checked:
+        try:
+            templates.TemplateResponse(name=template_name, context=context)
+            _template_needs_request = False
+        except TypeError:
+            _template_needs_request = True
+        _template_api_checked = True
+
+    if _template_needs_request:
+        return templates.TemplateResponse(request, template_name, context)
+    return templates.TemplateResponse(template_name, context)
+
 
 @app.on_event("startup")
 def on_startup():
@@ -61,10 +81,7 @@ async def home(request: Request):
         db.close()
     except Exception:
         pass
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "current_time": current_time, "stats": stats, "page": "home"}
-    )
+    return _render("index.html", request, {"current_time": current_time, "stats": stats, "page": "home"})
 
 
 @app.get("/suppliers", response_class=HTMLResponse)
@@ -78,10 +95,7 @@ async def suppliers_page(request: Request):
         db.close()
     except Exception:
         pass
-    return templates.TemplateResponse(
-        "suppliers.html",
-        {"request": request, "suppliers": suppliers_list, "page": "suppliers"}
-    )
+    return _render("suppliers.html", request, {"suppliers": suppliers_list, "page": "suppliers"})
 
 
 @app.get("/tenders", response_class=HTMLResponse)
@@ -99,10 +113,7 @@ async def tenders_page(request: Request):
         db.close()
     except Exception:
         pass
-    return templates.TemplateResponse(
-        "tenders.html",
-        {"request": request, "tenders": tenders_list, "stats": stats, "page": "tenders"}
-    )
+    return _render("tenders.html", request, {"tenders": tenders_list, "stats": stats, "page": "tenders"})
 
 
 @app.get("/reviews", response_class=HTMLResponse)
@@ -118,10 +129,7 @@ async def reviews_page(request: Request):
         db.close()
     except Exception:
         pass
-    return templates.TemplateResponse(
-        "reviews.html",
-        {"request": request, "reviews": reviews_list, "stats": stats, "page": "reviews"}
-    )
+    return _render("reviews.html", request, {"reviews": reviews_list, "stats": stats, "page": "reviews"})
 
 
 @app.get("/results", response_class=HTMLResponse)
@@ -129,10 +137,7 @@ async def results_page(request: Request):
     results_list = []
     score_summary = []
     stats = {"total": 0, "pending": 0, "approved": 0, "published": 0}
-    return templates.TemplateResponse(
-        "results.html",
-        {"request": request, "results": results_list, "score_summary": score_summary, "stats": stats, "page": "results"}
-    )
+    return _render("results.html", request, {"results": results_list, "score_summary": score_summary, "stats": stats, "page": "results"})
 
 
 @app.post("/api/tenders/upload")
