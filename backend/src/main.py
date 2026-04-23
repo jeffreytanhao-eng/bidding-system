@@ -5,8 +5,11 @@ from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from src.config.settings import get_settings
 from src.services.tender_parser import tender_parser
+from src.utils.database import create_tables
+from src.api.routes import suppliers, tenders, bids, reviews, results, users
 from datetime import datetime
 from pathlib import Path
 
@@ -26,11 +29,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(suppliers.router, prefix=settings.API_V1_STR)
+app.include_router(tenders.router, prefix=settings.API_V1_STR)
+app.include_router(bids.router, prefix=settings.API_V1_STR)
+app.include_router(reviews.router, prefix=settings.API_V1_STR)
+app.include_router(results.router, prefix=settings.API_V1_STR)
+app.include_router(users.router, prefix=settings.API_V1_STR)
+
 templates_path = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(templates_path))
 
 upload_dir = Path(__file__).parent.parent / "uploads"
 upload_dir.mkdir(exist_ok=True)
+
+static_dir = Path(__file__).parent / "static"
+static_dir.mkdir(exist_ok=True)
+
+
+@app.on_event("startup")
+def on_startup():
+    from src.models import supplier, tender, bid, review, user
+    create_tables()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -42,6 +61,18 @@ async def home(request: Request):
         "bids": 0,
         "results": 0
     }
+    try:
+        from src.utils.database import SessionLocal
+        from src.models.supplier import Supplier
+        from src.models.tender import Tender
+        from src.models.bid import Bid
+        db = SessionLocal()
+        stats["suppliers"] = db.query(Supplier).count()
+        stats["tenders"] = db.query(Tender).count()
+        stats["bids"] = db.query(Bid).count()
+        db.close()
+    except Exception:
+        pass
     return templates.TemplateResponse(
         "index.html",
         {"request": request, "current_time": current_time, "stats": stats, "page": "home"}
@@ -50,41 +81,69 @@ async def home(request: Request):
 
 @app.get("/suppliers", response_class=HTMLResponse)
 async def suppliers_page(request: Request):
-    suppliers = []
+    suppliers_list = []
+    try:
+        from src.utils.database import SessionLocal
+        from src.models.supplier import Supplier
+        db = SessionLocal()
+        suppliers_list = db.query(Supplier).all()
+        db.close()
+    except Exception:
+        pass
     return templates.TemplateResponse(
         "suppliers.html",
-        {"request": request, "suppliers": suppliers, "page": "suppliers"}
+        {"request": request, "suppliers": suppliers_list, "page": "suppliers"}
     )
 
 
 @app.get("/tenders", response_class=HTMLResponse)
 async def tenders_page(request: Request):
-    tenders = []
+    tenders_list = []
     stats = {"draft": 0, "published": 0, "in_progress": 0, "completed": 0}
+    try:
+        from src.utils.database import SessionLocal
+        from src.models.tender import Tender
+        db = SessionLocal()
+        tenders_list = db.query(Tender).order_by(Tender.created_at.desc()).all()
+        for t in tenders_list:
+            if t.status in stats:
+                stats[t.status] += 1
+        db.close()
+    except Exception:
+        pass
     return templates.TemplateResponse(
         "tenders.html",
-        {"request": request, "tenders": tenders, "stats": stats, "page": "tenders"}
+        {"request": request, "tenders": tenders_list, "stats": stats, "page": "tenders"}
     )
 
 
 @app.get("/reviews", response_class=HTMLResponse)
 async def reviews_page(request: Request):
-    reviews = []
+    reviews_list = []
     stats = {"pending": 0, "in_progress": 0, "completed": 0, "reviewers": 0}
+    try:
+        from src.utils.database import SessionLocal
+        from src.models.review import Reviewer
+        db = SessionLocal()
+        reviews_list = db.query(Reviewer).all()
+        stats["reviewers"] = len(reviews_list)
+        db.close()
+    except Exception:
+        pass
     return templates.TemplateResponse(
         "reviews.html",
-        {"request": request, "reviews": reviews, "stats": stats, "page": "reviews"}
+        {"request": request, "reviews": reviews_list, "stats": stats, "page": "reviews"}
     )
 
 
 @app.get("/results", response_class=HTMLResponse)
 async def results_page(request: Request):
-    results = []
+    results_list = []
     score_summary = []
     stats = {"total": 0, "pending": 0, "approved": 0, "published": 0}
     return templates.TemplateResponse(
         "results.html",
-        {"request": request, "results": results, "score_summary": score_summary, "stats": stats, "page": "results"}
+        {"request": request, "results": results_list, "score_summary": score_summary, "stats": stats, "page": "results"}
     )
 
 

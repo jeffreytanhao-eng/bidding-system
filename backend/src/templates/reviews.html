@@ -32,7 +32,7 @@
 <div class="card">
     <div class="toolbar">
         <div class="toolbar-left">
-            <select class="search-box" id="statusFilter" onchange="filterTable()" style="width:150px;">
+            <select class="search-box" id="statusFilter" onchange="filterTable()" style="width:140px;">
                 <option value="">全部状态</option>
                 <option value="pending">待评审</option>
                 <option value="in_progress">评审中</option>
@@ -61,10 +61,10 @@
                 <td>{{ review.reviewer_name }}</td>
                 <td>
                     {% if review.score %}
-                    <span style="color:#fa8c16; font-weight:700; font-size:18px;">{{ review.score }}</span>
-                    <span style="color:#999;">/100</span>
+                    <span class="score-value">{{ review.score }}</span>
+                    <span class="score-total">/100</span>
                     {% else %}
-                    <span style="color:#999;">未评分</span>
+                    <span style="color:var(--text-tertiary);">未评分</span>
                     {% endif %}
                 </td>
                 <td>
@@ -79,9 +79,9 @@
                 <td>{{ review.reviewed_at or '-' }}</td>
                 <td class="actions">
                     {% if review.status != 'completed' %}
-                    <button class="btn btn-primary" onclick="scoreReview('{{ review.id }}')">评分</button>
+                    <button class="btn btn-primary btn-sm" onclick="scoreReview('{{ review.id }}')">评分</button>
                     {% endif %}
-                    <button class="btn btn-outline" onclick="viewReview('{{ review.id }}')">详情</button>
+                    <button class="btn btn-ghost btn-sm" onclick="viewReview('{{ review.id }}')">详情</button>
                 </td>
             </tr>
             {% else %}
@@ -99,7 +99,7 @@
 </div>
 
 <div class="modal-overlay" id="scoreModal">
-    <div class="modal" style="width:500px;">
+    <div class="modal" style="width:480px;">
         <div class="modal-header">
             <h3>评审评分</h3>
             <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -121,7 +121,7 @@
                 </div>
                 <div class="form-group">
                     <label>总分</label>
-                    <input type="text" id="total_score" readonly style="background:#f5f5f5; font-weight:700; font-size:18px; color:#1890ff;">
+                    <input type="text" id="total_score" readonly style="background:var(--border-light); font-weight:600; font-size:var(--font-lg); color:var(--primary);">
                 </div>
                 <div class="form-group">
                     <label>评审意见</label>
@@ -130,7 +130,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeModal()">取消</button>
+            <button class="btn btn-ghost" onclick="closeModal()">取消</button>
             <button class="btn btn-primary" onclick="submitScore()">提交评分</button>
         </div>
     </div>
@@ -184,9 +184,12 @@ function submitScore() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.detail || '提交失败'); });
+        return r.json();
+    })
     .then(() => { closeModal(); window.location.reload(); })
-    .catch(() => alert('提交失败'));
+    .catch(e => alert('提交失败: ' + e.message));
 }
 </script>
 {% endblock %}

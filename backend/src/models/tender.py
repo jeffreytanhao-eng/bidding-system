@@ -9,11 +9,14 @@ class Tender(Base):
     __tablename__ = "tenders"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tender_no = Column(String(100), unique=True)
     title = Column(String(200), nullable=False)
     description = Column(Text)
     requirements = Column(Text)
     budget = Column(DECIMAL(15, 2))
-    deadline = Column(DateTime(timezone=True), nullable=False)
+    deadline = Column(DateTime(timezone=True))
+    open_time = Column(DateTime(timezone=True))
+    procurement_method = Column(String(50), default='public_bidding')
     status = Column(String(20), default='draft')
     business_weight = Column(DECIMAL(3, 2), default=0.4)
     technical_weight = Column(DECIMAL(3, 2), default=0.6)

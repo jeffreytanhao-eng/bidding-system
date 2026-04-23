@@ -49,6 +49,10 @@ dist-ssr/
 *.db
 *.sqlite
 
+# Uploads & Data
+backend/uploads/
+backend/data/
+
 # Logs
 *.log
 

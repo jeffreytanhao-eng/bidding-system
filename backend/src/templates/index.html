@@ -30,25 +30,25 @@
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom: 16px;">📌 快捷操作</h3>
-    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+    <div class="card-title">📌 快捷操作</div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <a href="/suppliers" class="btn btn-primary">管理供应商</a>
         <a href="/tenders" class="btn btn-primary">管理标书</a>
         <a href="/reviews" class="btn btn-success">评审中心</a>
         <a href="/results" class="btn btn-warning">中标管理</a>
-        <a href="/docs" class="btn btn-outline">API 文档</a>
+        <a href="/docs" class="btn btn-ghost">API 文档</a>
     </div>
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom: 16px;">🕐 系统信息</h3>
+    <div class="card-title">🕐 系统信息</div>
     <table>
-        <tr><td style="width:200px; color:#666;">系统版本</td><td>v1.0.0</td></tr>
-        <tr><td style="color:#666;">技术栈</td><td>Python 3.11 + FastAPI + SQLAlchemy</td></tr>
-        <tr><td style="color:#666;">前端方案</td><td>Jinja2 模板渲染</td></tr>
-        <tr><td style="color:#666;">数据库</td><td>PostgreSQL 15</td></tr>
-        <tr><td style="color:#666;">当前时间</td><td>{{ current_time }}</td></tr>
-        <tr><td style="color:#666;">系统状态</td><td><span class="badge badge-green">运行正常</span></td></tr>
+        <tr><td style="width:160px; color:var(--text-secondary);">系统版本</td><td>v1.0.0</td></tr>
+        <tr><td style="color:var(--text-secondary);">技术栈</td><td>Python 3.11 + FastAPI + SQLAlchemy</td></tr>
+        <tr><td style="color:var(--text-secondary);">前端方案</td><td>Jinja2 模板渲染</td></tr>
+        <tr><td style="color:var(--text-secondary);">数据库</td><td>SQLite (开发模式)</td></tr>
+        <tr><td style="color:var(--text-secondary);">当前时间</td><td>{{ current_time }}</td></tr>
+        <tr><td style="color:var(--text-secondary);">系统状态</td><td><span class="badge badge-green">运行正常</span></td></tr>
     </table>
 </div>
 {% endblock %}

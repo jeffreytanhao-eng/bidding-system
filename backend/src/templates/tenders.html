@@ -5,17 +5,17 @@
 .tab-bar {
     display: flex;
     gap: 0;
-    margin-bottom: 24px;
-    border-bottom: 2px solid var(--border);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-light);
 }
 .tab-bar .tab {
-    padding: 12px 24px;
+    padding: 8px 20px;
     cursor: pointer;
-    font-size: 15px;
+    font-size: var(--font-base);
     color: var(--text-secondary);
     border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.3s;
+    margin-bottom: -1px;
+    transition: all 0.25s;
     background: none;
     border-top: none;
     border-left: none;
@@ -25,141 +25,60 @@
 .tab-bar .tab.active {
     color: var(--primary);
     border-bottom-color: var(--primary);
-    font-weight: 600;
+    font-weight: 500;
 }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-
 .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    padding: 48px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s;
-    background: #fafafa;
+    transition: all 0.25s;
+    background: var(--border-light);
 }
 .upload-zone:hover, .upload-zone.dragover {
     border-color: var(--primary);
     background: #e6f7ff;
 }
-.upload-zone .upload-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-.upload-zone .upload-text {
-    font-size: 16px;
-    color: var(--text);
-    margin-bottom: 8px;
-}
-.upload-zone .upload-hint {
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-.upload-progress {
-    margin-top: 16px;
-    display: none;
-}
-.upload-progress .progress-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-}
-.upload-progress .progress-fill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 3px;
-    transition: width 0.3s;
-    width: 0%;
-}
-.extract-result {
-    margin-top: 24px;
-    display: none;
-}
-.extract-result .result-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-.extract-result .result-header h3 {
-    color: var(--success);
-    font-size: 16px;
-}
+.upload-zone .upload-icon { font-size: 36px; margin-bottom: 12px; }
+.upload-zone .upload-text { font-size: var(--font-base); color: var(--text); margin-bottom: 4px; }
+.upload-zone .upload-hint { font-size: var(--font-sm); color: var(--text-tertiary); }
+.upload-progress { margin-top: 12px; display: none; }
+.upload-progress .progress-bar { height: 4px; background: var(--border-light); border-radius: 2px; overflow: hidden; }
+.upload-progress .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.3s; width: 0%; }
+.extract-result { margin-top: 20px; display: none; }
+.extract-result .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.extract-result .result-header h3 { color: var(--success); font-size: var(--font-md); font-weight: 500; }
 .extract-field {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    margin-bottom: 12px;
-    padding: 8px 12px;
-    background: #f6ffed;
-    border-radius: 6px;
-    border-left: 3px solid var(--success);
+    display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+    padding: 8px 12px; background: #f6ffed; border-radius: var(--radius); border-left: 3px solid var(--success);
 }
-.extract-field.auto {
-    background: #f6ffed;
-    border-left-color: var(--success);
-}
-.extract-field.manual {
-    background: #fff7e6;
-    border-left-color: var(--warning);
-}
-.extract-field .field-label {
-    min-width: 100px;
-    font-weight: 600;
-    color: var(--text);
-    font-size: 13px;
-    padding-top: 4px;
-}
-.extract-field .field-value {
-    flex: 1;
-}
+.extract-field.auto { background: #f6ffed; border-left-color: var(--success); }
+.extract-field.manual { background: #fff7e6; border-left-color: var(--warning); }
+.extract-field .field-label { min-width: 100px; font-weight: 500; color: var(--text); font-size: var(--font-sm); }
+.extract-field .field-value { flex: 1; }
 .extract-field .field-value input,
 .extract-field .field-value textarea,
 .extract-field .field-value select {
-    width: 100%;
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 14px;
+    width: 100%; height: var(--height-base); padding: 0 10px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: var(--font-base);
 }
+.extract-field .field-value textarea { height: auto; min-height: 60px; padding: 6px 10px; }
 .extract-field .field-value input:focus,
 .extract-field .field-value textarea:focus,
 .extract-field .field-value select:focus {
-    border-color: var(--primary);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+    border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(24,144,255,0.15);
 }
-.extract-field .field-tag {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    white-space: nowrap;
-}
-.extract-field .field-tag.auto-tag {
-    background: #f6ffed;
-    color: var(--success);
-}
-.extract-field .field-tag.manual-tag {
-    background: #fff7e6;
-    color: var(--warning);
-}
-.raw-text-toggle {
-    margin-top: 12px;
-    text-align: center;
-}
+.extract-field .field-tag { font-size: 11px; padding: 2px 6px; border-radius: 8px; white-space: nowrap; }
+.extract-field .field-tag.auto-tag { background: #f6ffed; color: var(--success); }
+.extract-field .field-tag.manual-tag { background: #fff7e6; color: var(--warning); }
+.raw-text-toggle { margin-top: 12px; text-align: center; }
 .raw-text-box {
-    margin-top: 12px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: #f5f5f5;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    color: #666;
-    white-space: pre-wrap;
-    display: none;
+    margin-top: 8px; max-height: 180px; overflow-y: auto; background: var(--border-light);
+    padding: 10px; border-radius: var(--radius); font-size: var(--font-xs); color: var(--text-secondary);
+    white-space: pre-wrap; display: none;
 }
 </style>
 {% endblock %}
@@ -197,7 +116,7 @@
     <div class="toolbar">
         <div class="toolbar-left">
             <input type="text" class="search-box" id="searchInput" placeholder="搜索标书名称..." oninput="filterTable()">
-            <select class="search-box" id="statusFilter" onchange="filterTable()" style="width:150px;">
+            <select class="search-box" id="statusFilter" onchange="filterTable()" style="width:140px;">
                 <option value="">全部状态</option>
                 <option value="draft">草稿</option>
                 <option value="published">已发布</option>
@@ -207,7 +126,7 @@
             </select>
         </div>
         <div style="display:flex; gap:8px;">
-            <button class="btn btn-warning" onclick="showUploadModal()">📄 上传标书文件</button>
+            <button class="btn btn-warning" onclick="showUploadModal()">上传标书文件</button>
             <button class="btn btn-primary" onclick="showAddModal()">+ 手动新建</button>
         </div>
     </div>
@@ -227,9 +146,9 @@
         <tbody>
             {% for tender in tenders %}
             <tr data-name="{{ tender.title }}" data-status="{{ tender.status }}">
-                <td><code>{{ tender.tender_no }}</code></td>
+                <td><code>{{ tender.tender_no or '-' }}</code></td>
                 <td><strong>{{ tender.title }}</strong></td>
-                <td style="color:#fa8c16; font-weight:600;">¥{{ tender.budget }}</td>
+                <td class="money-value">¥{{ tender.budget or '-' }}</td>
                 <td>
                     {% if tender.status == 'draft' %}
                     <span class="badge badge-gray">草稿</span>
@@ -243,14 +162,14 @@
                     <span class="badge badge-red">已取消</span>
                     {% endif %}
                 </td>
-                <td>{{ tender.deadline }}</td>
+                <td>{{ tender.deadline or '-' }}</td>
                 <td>{{ tender.created_at }}</td>
                 <td class="actions">
-                    <button class="btn btn-outline" onclick="viewTender('{{ tender.id }}')">查看</button>
+                    <button class="btn btn-ghost btn-sm" onclick="viewTender('{{ tender.id }}')">查看</button>
                     {% if tender.status == 'draft' %}
-                    <button class="btn btn-success" onclick="publishTender('{{ tender.id }}')">发布</button>
+                    <button class="btn btn-success btn-sm" onclick="publishTender('{{ tender.id }}')">发布</button>
                     {% endif %}
-                    <button class="btn btn-primary" onclick="editTender('{{ tender.id }}')">编辑</button>
+                    <button class="btn btn-primary btn-sm" onclick="editTender('{{ tender.id }}')">编辑</button>
                 </td>
             </tr>
             {% else %}
@@ -259,8 +178,8 @@
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
                         <p>暂无标书数据</p>
-                        <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
-                            <button class="btn btn-warning" onclick="showUploadModal()">📄 上传标书文件</button>
+                        <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+                            <button class="btn btn-warning" onclick="showUploadModal()">上传标书文件</button>
                             <button class="btn btn-primary" onclick="showAddModal()">+ 手动新建</button>
                         </div>
                     </div>
@@ -312,16 +231,16 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeAddModal()">取消</button>
+            <button class="btn btn-ghost" onclick="closeAddModal()">取消</button>
             <button class="btn btn-primary" onclick="saveTender()">保存</button>
         </div>
     </div>
 </div>
 
 <div class="modal-overlay" id="uploadModal">
-    <div class="modal" style="width:700px;">
+    <div class="modal" style="width:640px;">
         <div class="modal-header">
-            <h3>📄 上传标书文件</h3>
+            <h3>上传标书文件</h3>
             <button class="modal-close" onclick="closeUploadModal()">&times;</button>
         </div>
         <div class="modal-body">
@@ -339,9 +258,9 @@
                 <input type="file" id="fileInput" style="display:none" accept=".pdf,.docx,.doc,.xlsx,.xls,.txt" onchange="handleFileSelect(event)">
 
                 <div class="upload-progress" id="uploadProgress">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                        <span id="uploadFileName" style="font-size:13px; color:#666;"></span>
-                        <span id="uploadPercent" style="font-size:13px; color:#1890ff;"></span>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span id="uploadFileName" style="font-size:var(--font-sm); color:var(--text-secondary);"></span>
+                        <span id="uploadPercent" style="font-size:var(--font-sm); color:var(--primary);"></span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
@@ -353,25 +272,22 @@
                 <div class="extract-result" id="extractResult">
                     <div class="result-header">
                         <h3>✅ 信息提取完成</h3>
-                        <span style="font-size:12px; color:#999;" id="extractFileName"></span>
+                        <span style="font-size:var(--font-xs); color:var(--text-tertiary);" id="extractFileName"></span>
                     </div>
-
                     <div id="extractFields"></div>
-
                     <div class="raw-text-toggle">
-                        <button class="btn btn-outline" onclick="toggleRawText()" style="font-size:12px;">查看原始提取文本</button>
+                        <button class="btn btn-ghost btn-sm" onclick="toggleRawText()">查看原始提取文本</button>
                     </div>
                     <div class="raw-text-box" id="rawTextBox"></div>
                 </div>
-
-                <div id="noExtract" style="text-align:center; padding:40px; color:#999;">
-                    <div style="font-size:36px; margin-bottom:12px;">📄</div>
+                <div id="noExtract" style="text-align:center; padding:40px; color:var(--text-tertiary);">
+                    <div style="font-size:32px; margin-bottom:8px;">📄</div>
                     <p>请先上传标书文件</p>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeUploadModal()">取消</button>
+            <button class="btn btn-ghost" onclick="closeUploadModal()">取消</button>
             <button class="btn btn-primary" id="confirmUploadBtn" onclick="confirmUpload()" style="display:none;">确认并创建标书</button>
         </div>
     </div>
@@ -487,7 +403,7 @@ function uploadFile(file) {
                 extractedData = resp.data;
                 renderExtractResult(resp.data);
                 switchTab('extract');
-                document.getElementById('confirmUploadBtn').style.display = 'inline-block';
+                document.getElementById('confirmUploadBtn').style.display = 'inline-flex';
             } else {
                 alert('解析失败: ' + (resp.error || '未知错误'));
             }
@@ -566,26 +482,37 @@ function toggleRawText() {
 
 function confirmUpload() {
     if (!extractedData) return;
-    const data = {
-        tender_no: document.getElementById('ext_tender_no').value,
-        title: document.getElementById('ext_title').value,
-        budget: parseFloat(document.getElementById('ext_budget').value) || 0,
-        deadline: document.getElementById('ext_deadline').value,
-        procurement_method: document.getElementById('ext_procurement_method').value,
-        description: document.getElementById('ext_description').value,
-    };
-    if (!data.title) {
+    const title = document.getElementById('ext_title').value;
+    if (!title) {
         alert('请填写标书名称');
         return;
+    }
+    const data = {
+        tender_no: document.getElementById('ext_tender_no').value || null,
+        title: title,
+        budget: parseFloat(document.getElementById('ext_budget').value) || null,
+        procurement_method: document.getElementById('ext_procurement_method').value || 'public_bidding',
+        description: document.getElementById('ext_description').value || null,
+    };
+    const deadlineVal = document.getElementById('ext_deadline').value;
+    if (deadlineVal) {
+        try {
+            data.deadline = new Date(deadlineVal).toISOString();
+        } catch {
+            data.deadline = null;
+        }
     }
     fetch('/api/v1/tenders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.detail || '创建失败'); });
+        return r.json();
+    })
     .then(() => { closeUploadModal(); window.location.reload(); })
-    .catch(() => alert('创建失败'));
+    .catch(e => alert('创建失败: ' + e.message));
 }
 
 function editTender(id) {
@@ -611,12 +538,18 @@ function saveTender() {
     const id = document.getElementById('tenderId').value;
     const data = {
         title: document.getElementById('title').value,
-        description: document.getElementById('description').value,
-        budget: parseFloat(document.getElementById('budget').value),
-        deadline: document.getElementById('deadline').value,
-        open_time: document.getElementById('open_time').value,
-        procurement_method: document.getElementById('procurement_method').value,
+        description: document.getElementById('description').value || null,
+        budget: parseFloat(document.getElementById('budget').value) || null,
+        procurement_method: document.getElementById('procurement_method').value || 'public_bidding',
     };
+    const deadlineVal = document.getElementById('deadline').value;
+    if (deadlineVal) {
+        data.deadline = new Date(deadlineVal).toISOString();
+    }
+    const openTimeVal = document.getElementById('open_time').value;
+    if (openTimeVal) {
+        data.open_time = new Date(openTimeVal).toISOString();
+    }
     const url = id ? '/api/v1/tenders/' + id : '/api/v1/tenders';
     const method = id ? 'PUT' : 'POST';
     fetch(url, {
@@ -624,9 +557,12 @@ function saveTender() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.detail || '保存失败'); });
+        return r.json();
+    })
     .then(() => { closeAddModal(); window.location.reload(); })
-    .catch(() => alert('保存失败'));
+    .catch(e => alert('保存失败: ' + e.message));
 }
 </script>
 {% endblock %}

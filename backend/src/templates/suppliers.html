@@ -10,7 +10,7 @@
     <div class="toolbar">
         <div class="toolbar-left">
             <input type="text" class="search-box" id="searchInput" placeholder="搜索供应商名称..." oninput="filterTable()">
-            <select class="search-box" id="ratingFilter" onchange="filterTable()" style="width:150px;">
+            <select class="search-box" id="ratingFilter" onchange="filterTable()" style="width:140px;">
                 <option value="">全部评级</option>
                 <option value="A">A级</option>
                 <option value="B">B级</option>
@@ -51,9 +51,9 @@
                 </td>
                 <td>{{ supplier.created_at }}</td>
                 <td class="actions">
-                    <button class="btn btn-outline" onclick="viewSupplier('{{ supplier.id }}')">查看</button>
-                    <button class="btn btn-primary" onclick="editSupplier('{{ supplier.id }}')">编辑</button>
-                    <button class="btn btn-error" onclick="deleteSupplier('{{ supplier.id }}')">删除</button>
+                    <button class="btn btn-outline btn-sm" onclick="viewSupplier('{{ supplier.id }}')">查看</button>
+                    <button class="btn btn-primary btn-sm" onclick="editSupplier('{{ supplier.id }}')">编辑</button>
+                    <button class="btn btn-error btn-sm" onclick="deleteSupplier('{{ supplier.id }}')">删除</button>
                 </td>
             </tr>
             {% else %}
@@ -62,7 +62,7 @@
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
                         <p>暂无供应商数据</p>
-                        <button class="btn btn-primary" onclick="showAddModal()" style="margin-top:16px;">+ 新增供应商</button>
+                        <button class="btn btn-primary" onclick="showAddModal()" style="margin-top:12px;">+ 新增供应商</button>
                     </div>
                 </td>
             </tr>
@@ -124,7 +124,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeModal()">取消</button>
+            <button class="btn btn-ghost" onclick="closeModal()">取消</button>
             <button class="btn btn-primary" onclick="saveSupplier()">保存</button>
         </div>
     </div>
@@ -196,9 +196,12 @@ function saveSupplier() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.json().then(d => { throw new Error(d.detail || '保存失败'); });
+        return r.json();
+    })
     .then(() => { closeModal(); window.location.reload(); })
-    .catch(() => alert('保存失败'));
+    .catch(e => alert('保存失败: ' + e.message));
 }
 </script>
 {% endblock %}
