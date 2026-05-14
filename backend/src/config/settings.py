@@ -39,7 +39,10 @@ def _get_database_url() -> str:
             url = url.replace("postgres://", "postgresql://", 1)
         return url
     from pathlib import Path
-    _db_dir = Path(__file__).parent.parent.parent / "data"
+    if os.environ.get("VERCEL"):
+        _db_dir = Path("/tmp") / "bidding-data"
+    else:
+        _db_dir = Path(__file__).parent.parent.parent / "data"
     _db_dir.mkdir(parents=True, exist_ok=True)
     _db_path = (_db_dir / "bidding.db").as_posix()
     return f"sqlite:///{_db_path}"
